@@ -1,0 +1,61 @@
+{
+  "name": "@gamepark/little-big-fish-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "React application",
+  "author": "Romain Fromi <romain@game-park.com> (https://game-park.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "@emotion/react": "^11.1.5",
+    "@gamepark/react-client": "~4.1.0",
+    "@gamepark/react-components": "~4.0.0",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.15",
+    "@types/react-dnd-multi-backend": "^6.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/react-redux": "^7.1.16",
+    "customize-cra": "^1.0.0",
+    "emotion-normalize": "^11.0.1",
+    "i18next": "^19.9.1",
+    "imagemin-webp-webpack-plugin": "^3.3.3",
+    "intl-messageformat": "^9.5.2",
+    "react": "^17.0.1",
+    "react-app-rewire-alias": "^1.0.1",
+    "react-app-rewired": "^2.1.8",
+    "react-dnd": "^13.1.1",
+    "react-dnd-html5-backend": "^12.1.1",
+    "react-dnd-multi-backend": "^6.0.2",
+    "react-dnd-touch-backend": "^12.0.0",
+    "react-dom": "^17.0.1",
+    "react-i18next": "^11.8.8",
+    "react-redux": "^7.2.2",
+    "react-scripts": "4.0.3",
+    "web-vitals": "^1.0.1"
+  },
+  "scripts": {
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-app-rewired eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

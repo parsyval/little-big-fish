@@ -1,0 +1,24 @@
+{
+  "name": "@gamepark/little-big-fish",
+  "version": "0.0.0",
+  "description": "Board Game Template rules for Game Park",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "Romain Fromi <romain@game-park.com> (https://game-park.com/)",
+  "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@gamepark/rules-api": "~4.1.1"
+  },
+  "devDependencies": {
+    "i18next": "^20.0.0"
+  }
+}

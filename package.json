@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "workspaces": ["rules", "app"],
+  "author": "Romain Fromi <romain@game-park.com> (https://game-park.com/)",
+  "license": "ISC",
+  "devDependencies": {
+    "lerna": "^4.0.0",
+    "typescript": "^4.2.2"
+  },
+  "scripts": {
+    "start": "yarn workspace @gamepark/little-big-fish-app run start",
+    "build": "yarn workspace @gamepark/little-big-fish-app run build"
+  }
+}
