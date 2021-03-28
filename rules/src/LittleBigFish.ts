@@ -1,13 +1,19 @@
-import {IncompleteInformation, SequentialGame} from '@gamepark/rules-api'
-import GameState, {Board} from './GameState'
+import { IncompleteInformation, SequentialGame } from '@gamepark/rules-api'
+import { shuffle } from 'lodash'
+import { Board, Board1, Board2, Board3, Board4 } from './GameElements/Board'
+import { FishSizeEnum } from './GameElements/Fish'
+import { SurpriseToken } from './GameElements/SurpriseToken'
+import GameState from './GameState'
 import GameView from './GameView'
-import {drawCard} from './moves/DrawCard'
+import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions'
+import { LBFUtils } from './LittleBigFishUtils'
 import Move from './moves/Move'
 import MoveType from './moves/MoveType'
 import MoveView from './moves/MoveView'
-import {spendGold} from './moves/SpendGold'
-import {isGameOptions, LittleBigFishOptions} from './LittleBigFishOptions'
+import { placeFish, placeFishMove } from './moves/PlaceFish'
+import { Phase } from './Phase'
 import PlayerColor from './PlayerColor'
+import PlayerState from './PlayerState'
 
 /**
  * Your Board Game rules must extend either "SequentialGame" or "SimultaneousGame".
@@ -34,8 +40,18 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    */
   constructor(arg: GameState | LittleBigFishOptions) {
     if (isGameOptions(arg)) {
-      const boards: Board[] = [];// Math.random des boards => lodash.shuffle
-      super({players: arg.players.map(player => ({color: player.id})), round: 1, deck: [], boards, activePlayer: arg.players[0].id});
+      const boards: Board[] = shuffle([Board1, Board2, Board3, Board4].map(b => ({id: b.id, rotation: Math.floor(Math.random() * 4)})));
+      const surpriseTokens: SurpriseToken[] = LBFUtils.initSupriseTokens();
+      const players: PlayerState[] = arg.players.map(playerOptions => LBFUtils.getInitialPlayerState(playerOptions.id));
+      super({
+        players, 
+        round: 1, 
+        boards, 
+        surpriseTokens,
+        phase: Phase.START,
+        activePlayer: arg.players[0].id,
+        fishes: new Map()
+      });
     } else {
       super(arg)
     }
@@ -61,10 +77,20 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * - A class that implements "Dummy" to provide a custom Dummy player.
    */
   getLegalMoves(): Move[] {
-    return [
-      {type: MoveType.SpendGold, playerId: this.getActivePlayer()!, quantity: 5},
-      {type: MoveType.DrawCard, playerId: this.getActivePlayer()!}
-    ]
+    const legalMoves: Move[] = [];
+    const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
+
+    if(this.state.phase === Phase.START) {
+      if(player.availableFish.get(FishSizeEnum.SMALL)! > 3){
+        LBFUtils.getStartPlacementIds(player.color, this.state.boards).forEach(id => legalMoves.push(
+          placeFishMove({size: FishSizeEnum.SMALL, color: player.color}, id)
+        ));
+      } else if(this.state.players.every(p => p.availableFish.get(FishSizeEnum.SMALL) === 3)) {
+        legalMoves.push({type: MoveType.START_PHASE, phase: Phase.PLAY})
+      }
+    }
+
+    return legalMoves;
   }
 
   /**
@@ -74,10 +100,8 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    */
   play(move: Move): void {
     switch (move.type) {
-      case MoveType.SpendGold:
-        return spendGold(this.state, move)
-      case MoveType.DrawCard:
-        return drawCard(this.state, move)
+      case MoveType.PLACE_FISH:
+        return placeFish(this.state, move);
     }
   }
 
@@ -111,18 +135,7 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return What a person can see from the game state
    */
   getView(): GameView {
-    return {...this.state, deck: this.state.deck.length}
-  }
-
-  /**
-   * If you game has "SecretInformation", you must also implement "getPlayerView", returning the information visible by a specific player.
-   * @param playerId Identifier of the player
-   * @return what the player can see
-   */
-  getPlayerView(playerId: PlayerColor): GameView {
-    console.log(playerId)
-    // Here we could, for example, return a "playerView" with only the number of cards in hand for the other player only.
-    return {...this.state, deck: this.state.deck.length}
+    return this.state;
   }
 
   /**
@@ -134,23 +147,6 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return What a person should know about the move that was played
    */
   getMoveView(move: Move): MoveView {
-    return move
-  }
-
-  /**
-   * If you game has secret information, sometime you need to alter a Move depending on which player it is.
-   * For example, if a card is drawn, the id of the revealed card should be ADDED to the Move in the MoveView, but only for the played that draws!
-   * Sometime, you will hide information: for example if a player secretly choose a card, you will hide the card to the other players or spectators.
-   *
-   * @param move The move that has been played
-   * @param playerId Identifier of the player seeing the move
-   * @return What a person should know about the move that was played
-   */
-  getPlayerMoveView(move: Move, playerId: PlayerColor): MoveView {
-    console.log(playerId)
-    if (move.type === MoveType.DrawCard) {
-      return {...move, card: this.state.deck[0]}
-    }
     return move
   }
 }

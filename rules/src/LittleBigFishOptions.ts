@@ -20,7 +20,7 @@ export type LittleBigFishOptions = GameOptions<{}, LittleBigFishPlayerOptions>
  * @return true if arg is a Game options
  */
 export function isGameOptions(arg: GameState | LittleBigFishOptions): arg is LittleBigFishOptions {
-  return typeof (arg as GameState).deck === 'undefined'
+  return typeof (arg as GameState).boards === 'undefined'
 }
 
 /**
