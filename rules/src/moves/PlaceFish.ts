@@ -20,6 +20,11 @@ export function placeFish(state: GameState, move: PlaceFish): void {
   state.fishes.set(move.onSquareId, move.fish);
 
   const player = state.players.find(player => player.color === move.fish.color);
-  const availabelFish = player?.availableFish.get(move.fish.size);
-  player?.availableFish.set(move.fish.size, availabelFish! - 1);
+
+  if (!player) {
+    throw new Error('No active player');
+  }
+
+  const availabelFish = player.availableFish[move.fish.size];
+  player.availableFish[move.fish.size] = availabelFish - 1;
 }

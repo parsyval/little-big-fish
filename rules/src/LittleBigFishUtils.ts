@@ -9,10 +9,11 @@ import PlayerState from "./PlayerState";
 
 export abstract class LBFUtils {
   public static getInitialPlayerState(color: PlayerColor): PlayerState {
-    const availableFish = new Map<FishSizeEnum, number>()
-      .set(FishSizeEnum.SMALL, 6)
-      .set(FishSizeEnum.MEDIUM, 4)
-      .set(FishSizeEnum.BIG, 2);
+    const availableFish = {
+      [FishSizeEnum.BIG]: 2,
+      [FishSizeEnum.MEDIUM]: 4,
+      [FishSizeEnum.SMALL]: 6,
+    }
 
     return {
       color,

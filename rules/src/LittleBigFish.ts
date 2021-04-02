@@ -81,11 +81,11 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
     const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
 
     if(this.state.phase === Phase.START) {
-      if(player.availableFish.get(FishSizeEnum.SMALL)! > 3){
+      if(player.availableFish[FishSizeEnum.SMALL] > 3){
         LBFUtils.getStartPlacementIds(player.color, this.state.boards).forEach(id => legalMoves.push(
           placeFishMove({size: FishSizeEnum.SMALL, color: player.color}, id)
         ));
-      } else if(this.state.players.every(p => p.availableFish.get(FishSizeEnum.SMALL) === 3)) {
+      } else if(this.state.players.every(p => p.availableFish[FishSizeEnum.SMALL] === 3)) {
         legalMoves.push({type: MoveType.START_PHASE, phase: Phase.PLAY})
       }
     }

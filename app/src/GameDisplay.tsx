@@ -1,7 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import {css, keyframes} from '@emotion/react'
+import { css, keyframes } from '@emotion/react'
 import GameState from '@gamepark/little-big-fish/GameState'
-import {Letterbox} from '@gamepark/react-components'
+import { Letterbox } from '@gamepark/react-components'
+import { Boards } from './Board/Boards'
+import { PlayerSide } from './PlayerSide/PlayerSide'
 
 type Props = {
   game: GameState
@@ -10,13 +12,9 @@ type Props = {
 export default function GameDisplay({game}: Props) {
   return (
     <Letterbox css={letterBoxStyle} top={0}>
-      <div css={css`position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 3rem;`}>
-        {JSON.stringify(game)}
-      </div>
+      <PlayerSide playerState={game.players[1]}></PlayerSide>
+      <Boards boards={game.boards}></Boards>
+      <PlayerSide playerState={game.players[0]}></PlayerSide>
     </Letterbox>
   )
 }
