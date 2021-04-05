@@ -23,11 +23,10 @@ export const Fish: FunctionComponent<FishProps> = ({color, size}) => {
   }
 
   return (
-      <img src={getFishImage(color, size)} alt="Meaningful text" css={[resize()]}></img>
+    <img src={getFishImage(color, size)} alt="Meaningful text" css={[resize(size)]}></img>
   )
 }
 
-const resize = () => css`
-  width: 10%;
-  height: 10%;
+const resize = (size: FishSizeEnum) => css`
+width: ${size === FishSizeEnum.SMALL ? '70%' : '100%'};
 `

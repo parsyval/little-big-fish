@@ -50,7 +50,7 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
         surpriseTokens,
         phase: Phase.START,
         activePlayer: arg.players[0].id,
-        fishes: new Map()
+        fishes: []
       });
     } else {
       super(arg)
@@ -82,7 +82,7 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
 
     if(this.state.phase === Phase.START) {
       if(player.availableFish[FishSizeEnum.SMALL] > 3){
-        LBFUtils.getStartPlacementIds(player.color, this.state.boards).forEach(id => legalMoves.push(
+        LBFUtils.getStartPlacementIds(player.color, this.state.boards, this.state.fishes).forEach(id => legalMoves.push(
           placeFishMove({size: FishSizeEnum.SMALL, color: player.color}, id)
         ));
       } else if(this.state.players.every(p => p.availableFish[FishSizeEnum.SMALL] === 3)) {

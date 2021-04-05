@@ -1,4 +1,4 @@
-import {Game} from '@gamepark/rules-api'
+import { Game } from '@gamepark/rules-api'
 import GameView from './GameView'
 import MoveType from './moves/MoveType'
 import MoveView from './moves/MoveView'

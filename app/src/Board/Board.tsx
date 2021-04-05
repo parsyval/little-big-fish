@@ -1,14 +1,14 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { Board as BoardObj } from "@gamepark/little-big-fish/GameElements/Board";
 import { FunctionComponent } from "react";
 import { Images } from "../images/Images";
 
 type BoardProps = {
-  id: number,
-  rotation: number,
+  board: BoardObj
 };
 
-export const Board: FunctionComponent<BoardProps> = ({id, rotation}) => {
+export const Board: FunctionComponent<BoardProps> = ({board}) => {
 
   const getBoardImage = function(id: number) {
     return id === 1 ? Images.board1
@@ -18,7 +18,7 @@ export const Board: FunctionComponent<BoardProps> = ({id, rotation}) => {
   }
 
   return (
-    <img src={getBoardImage(id)} css={[background(rotation)]} alt="Meaningful text"></img>
+    <img src={getBoardImage(board.id)} css={[background(board.rotation)]} alt="Meaningful text"></img>
   );
 };
 

@@ -17,7 +17,12 @@ export function placeFishMove(fish: Fish, id: number): PlaceFish {
 }
 
 export function placeFish(state: GameState, move: PlaceFish): void {
-  state.fishes.set(move.onSquareId, move.fish);
+  const currentFishAtPosition = state.fishes.find(f => f.squareId === move.onSquareId);
+  if(currentFishAtPosition) {
+    currentFishAtPosition.fish = move.fish;
+  } else {
+    state.fishes.push({squareId: move.onSquareId, fish: move.fish});
+  }
 
   const player = state.players.find(player => player.color === move.fish.color);
 

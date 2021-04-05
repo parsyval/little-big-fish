@@ -12,7 +12,8 @@ type GameState = {
   activePlayer?: PlayerColor;
   round: number;
   surpriseTokens: SurpriseToken[];
-  fishes: Map<number, Fish>; // <squareId, Fish>
+  fishes: SquareWithAFish[];
 }
 
+export type SquareWithAFish = {squareId: number; fish: Fish};
 export default GameState

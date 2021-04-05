@@ -4,6 +4,7 @@ import GameState from '@gamepark/little-big-fish/GameState'
 import { Letterbox } from '@gamepark/react-components'
 import { Boards } from './Board/Boards'
 import { PlayerSide } from './PlayerSide/PlayerSide'
+import { Squares } from './Square/Squares'
 
 type Props = {
   game: GameState
@@ -13,7 +14,10 @@ export default function GameDisplay({game}: Props) {
   return (
     <Letterbox css={letterBoxStyle} top={0}>
       <PlayerSide playerState={game.players[1]}></PlayerSide>
-      <Boards boards={game.boards}></Boards>
+      <div css={css`position: relative`}>
+        <Boards boards={game.boards}></Boards>
+        <Squares gameState={game}></Squares>
+      </div>
       <PlayerSide playerState={game.players[0]}></PlayerSide>
     </Letterbox>
   )

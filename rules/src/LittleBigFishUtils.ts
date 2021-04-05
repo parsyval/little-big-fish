@@ -4,6 +4,7 @@ import { FishSizeEnum } from "./GameElements/Fish";
 import { PlanktonColor } from "./GameElements/PlanktonToken";
 import { SurpriseToken, SurpriseTokenEnum } from "./GameElements/SurpriseToken";
 import { SymbolEnum } from "./GameElements/Symbols";
+import { SquareWithAFish } from './GameState';
 import PlayerColor from "./PlayerColor";
 import PlayerState from "./PlayerState";
 
@@ -37,40 +38,53 @@ export abstract class LBFUtils {
     ]);
   }
 
-  public static rotateBoard(board: BoardView) {
+  public static rotateMatrice<T>(matrice: T[][]): T[][] {
+    const result: T[][] = JSON.parse(JSON.stringify(matrice));
+    
     // reverse the rows
-    board.squares = board.squares.reverse();
+    result.reverse();
     
     // swap the symmetric elements
-    for (var i = 0; i < board.squares.length; i++) {
+    for (var i = 0; i < result.length; i++) {
       for (var j = 0; j < i; j++) {
-        var temp = board.squares[i][j];
-        board.squares[i][j] = board.squares[j][i];
-        board.squares[j][i] = temp;
+        var temp = result[i][j];
+        result[i][j] = result[j][i];
+        result[j][i] = temp;
       }
-    }
-  }
-
-  public static getBoardViewFromBoard(board: Board): BoardView {
-    const result = board.id === 1 ? Board1
-    : board.id === 2 ? Board2
-    : board.id === 3 ? Board3
-    : Board4;
-
-    for(let i=0 ; i<board.rotation ; i++) {
-      LBFUtils.rotateBoard(result);
     }
 
     return result;
   }
 
-  public static getStartPlacementIds(color: PlayerColor, boards: Board[]): number[]{
-    const boardViews: BoardView[] = boards.map(b => LBFUtils.getBoardViewFromBoard(b));
+  public static getBoardViewFromBoard(board: Board): BoardView {
+    let squares = board.id === 1 ? Board1.squares
+    : board.id === 2 ? Board2.squares
+    : board.id === 3 ? Board3.squares
+    : Board4.squares;
 
-    if(color === PlayerColor.Orange) {
-      return [...boardViews[0].squares[0], ...boardViews[1].squares[0]].filter(square => square.type === SymbolEnum.OCEAN).map(square => square.id);
-    } else {
-      return [...boardViews[2].squares[2], ...boardViews[4].squares[2]].filter(square => square.type === SymbolEnum.OCEAN).map(square => square.id);
+    for(let i=0 ; i<board.rotation ; i++) {
+      squares = LBFUtils.rotateMatrice(squares);
     }
+
+    return {
+      id: board.id,
+      rotation: board.rotation,
+      squares
+    };
+  }
+
+  public static getBoardViews(boards: Board[]): BoardView[] {
+    return boards.map(LBFUtils.getBoardViewFromBoard);
+  }
+
+  public static getStartPlacementIds(color: PlayerColor, boards: Board[], fishes: SquareWithAFish[]): number[]{
+    const boardViews: BoardView[] = LBFUtils.getBoardViews(boards);
+    const line = color === PlayerColor.Orange 
+    ? [...boardViews[0].squares[0], ...boardViews[1].squares[0]] 
+    : [...boardViews[2].squares[2], ...boardViews[3].squares[2]];
+
+    return line.filter(square => square.type === SymbolEnum.OCEAN)
+      .filter(square => !fishes.some(f => f.squareId === square.id))
+      .map(square => square.id);
   }
 }
