@@ -5,8 +5,7 @@ import GameState from "@gamepark/little-big-fish/GameState";
 import { LBFUtils } from "@gamepark/little-big-fish/LittleBigFishUtils";
 import { placeFishMove } from "@gamepark/little-big-fish/moves/PlaceFish";
 import { Phase } from "@gamepark/little-big-fish/Phase";
-import PlayerColor from "@gamepark/little-big-fish/PlayerColor";
-import { usePlay } from "@gamepark/react-client";
+import { usePlay, usePlayerId } from "@gamepark/react-client";
 import { FunctionComponent } from "react";
 import { Fish } from "../Fish/Fish";
 
@@ -17,13 +16,14 @@ type SquareProps = {
 
 export const Square: FunctionComponent<SquareProps> = ({squareId, gameState}) => {
   const play = usePlay();
+  const playerId = usePlayerId();
 
-  const isStartPhaseAndClickable = () => gameState.phase === Phase.START 
-  && LBFUtils.getStartPlacementIds(gameState.activePlayer!, gameState.boards, gameState.fishes).includes(squareId);
+  const isStartPhaseAndClickable = () => gameState.activePlayer! === playerId && gameState.phase === Phase.START 
+  && LBFUtils.getStartPlacementIds(playerId, gameState.boards, gameState.fishes).includes(squareId);
 
   const onClick = function() {
     if(isStartPhaseAndClickable()) {
-      play(placeFishMove({size: FishSizeEnum.SMALL, color: PlayerColor.Orange}, squareId));
+      play(placeFishMove({size: FishSizeEnum.SMALL, color: gameState.activePlayer!}, squareId));
     }
   }
 

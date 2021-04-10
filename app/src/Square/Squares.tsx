@@ -2,6 +2,7 @@
 import { css } from "@emotion/react";
 import GameState from "@gamepark/little-big-fish/GameState";
 import { LBFUtils } from "@gamepark/little-big-fish/LittleBigFishUtils";
+import { usePlayerId } from "@gamepark/react-client";
 import { FunctionComponent, useEffect, useState } from "react";
 import { Square } from './Square';
 
@@ -12,6 +13,8 @@ type SquareProps = {
 export const Squares: FunctionComponent<SquareProps> = ({gameState}) => {
   const [boardViews, setBoardViews] = useState(() => LBFUtils.getBoardViews(gameState.boards));
   useEffect(() => {setBoardViews(LBFUtils.getBoardViews)}, [gameState.boards]);
+
+  const playerId = usePlayerId();
 
   const getLineOfSquares = function(x: number) {
     let b1 = boardViews[0];
@@ -25,7 +28,7 @@ export const Squares: FunctionComponent<SquareProps> = ({gameState}) => {
     x = x === 3 ? 0 : x === 4 ? 1 : x === 5 ? 2 : x;
 
     const marginMatchingBoardImage = (idx: number) => idx === 3 ? css`margin-left: 1.6%` : '';
-    const colorPlacementSquare = (id: number) => css`${LBFUtils.getStartPlacementIds(gameState.activePlayer!, boardViews, gameState.fishes)
+    const colorPlacementSquare = (id: number) => css`${LBFUtils.getStartPlacementIds(playerId, boardViews, gameState.fishes)
       .includes(id) ? 'background-color: red;' : ''}`
 
     const test =  [...b1.squares[x], ...b2.squares[x]].map((square, idx) => (

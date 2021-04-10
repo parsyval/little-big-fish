@@ -13,6 +13,7 @@ type Props = {
 export default function GameDisplay({game}: Props) {
   return (
     <Letterbox css={letterBoxStyle} top={0}>
+      <div>Active player is {game.activePlayer}</div>
       <PlayerSide playerState={game.players[1]}></PlayerSide>
       <div css={css`position: relative`}>
         <Boards boards={game.boards}></Boards>

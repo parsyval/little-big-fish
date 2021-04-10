@@ -11,7 +11,8 @@ import Move from './moves/Move'
 import MoveType from './moves/MoveType'
 import MoveView from './moves/MoveView'
 import { placeFish, placeFishMove } from './moves/PlaceFish'
-import { Phase } from './Phase'
+import { switchPlayer } from './moves/SwitchPlayer'
+import { Phase, startPhase } from './Phase'
 import PlayerColor from './PlayerColor'
 import PlayerState from './PlayerState'
 
@@ -44,7 +45,7 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
       const surpriseTokens: SurpriseToken[] = LBFUtils.initSupriseTokens();
       const players: PlayerState[] = arg.players.map(playerOptions => LBFUtils.getInitialPlayerState(playerOptions.id));
       super({
-        players, 
+        players,
         round: 1, 
         boards, 
         surpriseTokens,
@@ -63,7 +64,15 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return The identifier of the player whose turn it is
    */
   getActivePlayer(): PlayerColor | undefined {
-    return this.state.activePlayer; // You must return undefined only when game is over, otherwise the game will be blocked.
+    return this.state.phase === Phase.PLAY 
+    && (this.state.players.some(p => p.capturedFishes === 5)
+    || this.state.fishes.filter(f => f.fish.color === PlayerColor.ORANGE).length === 1
+    || this.state.fishes.filter(f => f.fish.color === PlayerColor.PINK).length === 1)
+    ? undefined : this.state.activePlayer;
+  }
+
+  getActivePlayerState(color: PlayerColor): PlayerState {
+    return this.state.players.find(p => p.color === color)!;
   }
 
   /**
@@ -102,6 +111,10 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
     switch (move.type) {
       case MoveType.PLACE_FISH:
         return placeFish(this.state, move);
+      case MoveType.SWITCH_PLAYER:
+        return switchPlayer(this.state);
+      case MoveType.START_PHASE: 
+        return startPhase(this.state, move);
     }
   }
 
@@ -119,14 +132,18 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return The next automatic consequence that should be played in current game state.
    */
   getAutomaticMove(): void | Move {
-    /**
-     * Example:
-     * for (const player of this.state.players) {
-     *   if (player.mustDraw) {
-     *     return {type: MoveType.DrawCard, playerId: player.color}
-     *   }
-     * }
-     */
+    if(!this.getActivePlayer()) return;
+
+    if(this.state.phase === Phase.START) {
+      if(this.getActivePlayerState(this.getActivePlayer()!).availableFish[FishSizeEnum.SMALL] === 3) {
+        if (this.state.players.find(p => p.color !== this.getActivePlayer()!)?.availableFish[FishSizeEnum.SMALL] === 3) {
+          return {type: MoveType.START_PHASE, phase: Phase.PLAY};
+        }
+        
+        return {type: MoveType.SWITCH_PLAYER};
+      }
+    }
+
     return
   }
 

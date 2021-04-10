@@ -9,7 +9,6 @@ type BoardProps = {
 };
 
 export const Board: FunctionComponent<BoardProps> = ({board}) => {
-
   const getBoardImage = function(id: number) {
     return id === 1 ? Images.board1
     : id === 2 ? Images.board2

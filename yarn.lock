@@ -1295,6 +1295,13 @@
   dependencies:
     "@fortawesome/fontawesome-common-types" "^0.2.35"
 
+"@fortawesome/free-regular-svg-icons@^5.15.3":
+  version "5.15.3"
+  resolved "https://registry.yarnpkg.com/@fortawesome/free-regular-svg-icons/-/free-regular-svg-icons-5.15.3.tgz#1ec4f2410ff638db549c5c5484fc60b66407dbe6"
+  integrity sha512-q4/p8Xehy9qiVTdDWHL4Z+o5PCLRChePGZRTXkl+/Z7erDVL8VcZUuqzJjs6gUz6czss4VIPBRdCz6wP37/zMQ==
+  dependencies:
+    "@fortawesome/fontawesome-common-types" "^0.2.35"
+
 "@fortawesome/free-solid-svg-icons@^5.15.2", "@fortawesome/free-solid-svg-icons@^5.15.3":
   version "5.15.3"
   resolved "https://registry.yarnpkg.com/@fortawesome/free-solid-svg-icons/-/free-solid-svg-icons-5.15.3.tgz#52eebe354f60dc77e0bde934ffc5c75ffd04f9d8"
@@ -1309,16 +1316,17 @@
   dependencies:
     prop-types "^15.7.2"
 
-"@gamepark/react-client@~4.5.0":
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/@gamepark/react-client/-/react-client-4.5.0.tgz#66c4ea4674af729dfaedd067d189376d624201ae"
-  integrity sha512-hCnTDTnZp6cUSnXj6nqamb6tqKHL5BXBte4wkyxjmm1ckyd08C3GmnXOnpzhWr9ns70L09teYX34vyhxtMloRg==
+"@gamepark/react-client@~4.11.2":
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/@gamepark/react-client/-/react-client-4.11.2.tgz#a3db48ec7cc82d9dd51f3764d4a29d4bd1737591"
+  integrity sha512-RR28whqqwvBZtjPmaoLa182XswLSKqGcgrIH9mjco1WwnnJGcKUNvDa0ON1wnc90ArBvEc7g8wrbGCaP/urfmQ==
   dependencies:
     "@apollo/client" "^3.1.3"
     "@datadog/browser-logs" "^1.11.4"
+    "@fortawesome/free-regular-svg-icons" "^5.15.3"
     "@fortawesome/free-solid-svg-icons" "^5.15.3"
     "@fortawesome/react-fontawesome" "^0.1.14"
-    "@gamepark/rules-api" "^4.2.1"
+    "@gamepark/rules-api" "^4.8.0"
     "@types/lodash.shuffle" "^4.2.6"
     "@types/react" "^17.0.3"
     assert "^2.0.0"
@@ -1334,26 +1342,20 @@
     pusher-js "^7.0.0"
     redux ">=4.0.5"
 
-"@gamepark/react-components@~4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@gamepark/react-components/-/react-components-4.0.0.tgz#26b5a457b08c4411caec88fa37b76b8f6f1b7923"
-  integrity sha512-TbxN2dGbifMKuIDMW9XUhBesxzMuPyJInZmdlfAS7cwqjgsiq6ZYAU4mTNMvWdz+46EcSzVxgXkchY5HfdxZMg==
+"@gamepark/react-components@~4.11.0":
+  version "4.11.0"
+  resolved "https://registry.yarnpkg.com/@gamepark/react-components/-/react-components-4.11.0.tgz#59fe13babe84e772931099d30b6f5cd7b4133022"
+  integrity sha512-yhZBBEXrnMAevqaZ0IvZ+p1x1b+kXr847PCeIhHIimblCwiRc4AVjepKdhm/jemvKDIteUiJikJlCL4WTpuwwg==
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.34"
     "@fortawesome/free-solid-svg-icons" "^5.15.2"
     "@fortawesome/react-fontawesome" "^0.1.14"
+    "@react-dnd/shallowequal" "^2.0.0"
 
-"@gamepark/rules-api@^4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@gamepark/rules-api/-/rules-api-4.2.1.tgz#eded03e4988aee9408779d9781ea5aa4294e2f18"
-  integrity sha512-6/hYTffwkIlbwlyLbuVnuY79H+wfriC0B0p3iNEUlS/3MtVFGCyq1UJjJ8R85RoLVANBYI3fYLN1y3en3lS2yw==
-  dependencies:
-    fast-deep-equal "^3.1.3"
-
-"@gamepark/rules-api@~4.1.1":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@gamepark/rules-api/-/rules-api-4.1.1.tgz#2b06912ad70f5fb46d37bdba0f7bc2d5c0afc05e"
-  integrity sha512-TeJZnUZ/26gx/yzDzkmA3nkdiIOfRi7x8xTjD0lcR7Bz6ap4MUiguWwmWOd/CTr8AQVfLJqpA2PpmmUhPzf6lw==
+"@gamepark/rules-api@^4.8.0", "@gamepark/rules-api@~4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@gamepark/rules-api/-/rules-api-4.8.0.tgz#8b9b42435da2f146ed78ba5e4eac296b2dc59abe"
+  integrity sha512-ly61WeHflx1nKOYV4aWaoQvPlXBxFgcJiYH2HxgWB5AQSdl3Db0KVoIIlTR9wAF9kvQSRjU16ShEuQhDb2NwUw==
   dependencies:
     fast-deep-equal "^3.1.3"
 

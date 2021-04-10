@@ -3,6 +3,8 @@ import GameView from './GameView'
 import MoveType from './moves/MoveType'
 import MoveView from './moves/MoveView'
 import { placeFish } from './moves/PlaceFish'
+import { switchPlayer } from './moves/SwitchPlayer'
+import { startPhase } from './Phase'
 
 /**
  * This class is useful when the game has "IncompleteInformation" (or "SecretInformation").
@@ -36,6 +38,10 @@ export default class LittleBigFishView implements Game<GameView, MoveView> {
     switch (move.type) {
       case MoveType.PLACE_FISH:
         return placeFish(this.state, move);
+      case MoveType.SWITCH_PLAYER:
+        return switchPlayer(this.state);
+      case MoveType.START_PHASE: 
+        return startPhase(this.state, move);
     }
   }
 }

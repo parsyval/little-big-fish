@@ -14,11 +14,11 @@ export const Fish: FunctionComponent<FishProps> = ({color, size}) => {
 
   const getFishImage = function(color: PlayerColor, size: FishSizeEnum) {
     if(size === FishSizeEnum.BIG){
-      return color === PlayerColor.Pink ? Images.fishPinkBig : Images.fishOrangeBig;
+      return color === PlayerColor.PINK ? Images.fishPinkBig : Images.fishOrangeBig;
     } else if(size === FishSizeEnum.MEDIUM){
-      return color === PlayerColor.Pink ? Images.fishPinkMedium : Images.fishOrangeMedium;
+      return color === PlayerColor.PINK ? Images.fishPinkMedium : Images.fishOrangeMedium;
     } else {
-      return color === PlayerColor.Pink ? Images.fishPinkSmall : Images.fishOrangeSmall;
+      return color === PlayerColor.PINK ? Images.fishPinkSmall : Images.fishOrangeSmall;
     }
   }
 

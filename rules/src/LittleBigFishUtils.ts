@@ -79,12 +79,14 @@ export abstract class LBFUtils {
 
   public static getStartPlacementIds(color: PlayerColor, boards: Board[], fishes: SquareWithAFish[]): number[]{
     const boardViews: BoardView[] = LBFUtils.getBoardViews(boards);
-    const line = color === PlayerColor.Orange 
-    ? [...boardViews[0].squares[0], ...boardViews[1].squares[0]] 
-    : [...boardViews[2].squares[2], ...boardViews[3].squares[2]];
+    const line = color === PlayerColor.PINK
+      ? [...boardViews[0].squares[0], ...boardViews[1].squares[0]] 
+      : [...boardViews[2].squares[2], ...boardViews[3].squares[2]];
 
-    return line.filter(square => square.type === SymbolEnum.OCEAN)
+    const result = line.filter(square => square.type === SymbolEnum.OCEAN)
       .filter(square => !fishes.some(f => f.squareId === square.id))
       .map(square => square.id);
+
+    return result;
   }
 }

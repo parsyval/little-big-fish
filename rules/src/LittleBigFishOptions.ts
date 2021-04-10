@@ -1,5 +1,5 @@
-import {GameOptions, OptionsDescription, OptionType} from '@gamepark/rules-api'
-import {TFunction} from 'i18next'
+import { GameOptions, OptionsDescription, OptionType } from '@gamepark/rules-api'
+import { TFunction } from 'i18next'
 import GameState from './GameState'
 import PlayerColor from './PlayerColor'
 
@@ -35,9 +35,9 @@ export const LittleBigFishOptionsDescription: OptionsDescription<{}, LittleBigFi
       values: Object.values(PlayerColor),
       getValueLabel: (color: PlayerColor, t: TFunction) => {
         switch (color) {
-          case PlayerColor.Pink:
+          case PlayerColor.PINK:
             return t('Pink player')
-          case PlayerColor.Orange:
+          case PlayerColor.ORANGE:
             return t('Orange player')
         }
       }
