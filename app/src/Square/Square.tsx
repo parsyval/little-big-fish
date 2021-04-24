@@ -1,38 +1,29 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import { FishSizeEnum } from "@gamepark/little-big-fish/GameElements/Fish";
 import GameState from "@gamepark/little-big-fish/GameState";
-import { LBFUtils } from "@gamepark/little-big-fish/LittleBigFishUtils";
-import { placeFishMove } from "@gamepark/little-big-fish/moves/PlaceFish";
-import { Phase } from "@gamepark/little-big-fish/Phase";
-import { usePlay, usePlayerId } from "@gamepark/react-client";
 import { FunctionComponent } from "react";
-import { Fish } from "../Fish/Fish";
 
 type SquareProps = {
   squareId: number;
   gameState: GameState;
 }
 
-export const Square: FunctionComponent<SquareProps> = ({squareId, gameState}) => {
-  const play = usePlay();
-  const playerId = usePlayerId();
-
-  const isStartPhaseAndClickable = () => gameState.activePlayer! === playerId && gameState.phase === Phase.START 
-  && LBFUtils.getStartPlacementIds(playerId, gameState.boards, gameState.fishes).includes(squareId);
+export const Square: FunctionComponent<SquareProps> = ({squareId}) => {
+  // const isStartPhaseAndClickable = () => gameState.activePlayer! === playerId && gameState.phase === Phase.START 
+  // && LBFUtils.getStartPlacementIds(playerId, gameState.boards, gameState.fishes).includes(squareId);
 
   const onClick = function() {
-    if(isStartPhaseAndClickable()) {
-      play(placeFishMove({size: FishSizeEnum.SMALL, color: gameState.activePlayer!}, squareId));
-    }
+    // if(isStartPhaseAndClickable()) {
+    //   play(placeFishMove({size: FishSizeEnum.SMALL, color: gameState.activePlayer!}, squareId));
+    // }
   }
 
   const displayFish = function() {
-    const fish = gameState.fishes.find(f => f.squareId === squareId)?.fish;
+    // const fish = gameState.fishes.find(f => f.squareId === squareId)?.fish;
     
-    if(fish) {
-      return <div css={[css`position: absolute; width: 13%`, fishMargin(fish.size)]}><Fish color={fish.color} size={fish.size}></Fish></div>
-    }
+    // if(fish) {
+    //   return <div css={[css`position: absolute; width: 13%`, fishMargin(fish.size)]}><Fish color={fish.color} size={fish.size}></Fish></div>
+    // }
 
     return;
   }
@@ -45,7 +36,7 @@ export const Square: FunctionComponent<SquareProps> = ({squareId, gameState}) =>
   );
 }
 
-const fishMargin = (size: FishSizeEnum) => css`
-  margin-left: ${size === FishSizeEnum.SMALL ? '3%' : '1.2%'};
-  margin-top: 1.5%;
-`
+// const fishMargin = (size: FishSizeEnum) => css`
+//   margin-left: ${size === FishSizeEnum.SMALL ? '3%' : '1.2%'};
+//   margin-top: 1.5%;
+// `

@@ -1,27 +1,28 @@
 import { Fish } from "../GameElements/Fish";
-import GameState from "../GameState";
+import GameState, { Position } from "../GameState";
 import MoveType from "./MoveType";
 
 export type PlaceFish = {
   type: MoveType.PLACE_FISH,
   fish: Fish,
-  onSquareId: number, 
+  position: Position, 
 }
 
-export function placeFishMove(fish: Fish, id: number): PlaceFish {
+export function placeFishMove(fish: Fish, position: Position): PlaceFish {
   return {
     type: MoveType.PLACE_FISH,
-    fish: fish,
-    onSquareId: id
+    fish,
+    position, 
   }
 }
 
 export function placeFish(state: GameState, move: PlaceFish): void {
-  const currentFishAtPosition = state.fishes.find(f => f.squareId === move.onSquareId);
+  const currentFishAtPosition = state.fishPositions.find(f => f.position.X === move.position.X && f.position.Y === move.position.Y);
+  
   if(currentFishAtPosition) {
     currentFishAtPosition.fish = move.fish;
   } else {
-    state.fishes.push({squareId: move.onSquareId, fish: move.fish});
+    state.fishPositions.push({position: move.position, fish: move.fish});
   }
 
   const player = state.players.find(player => player.color === move.fish.color);

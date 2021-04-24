@@ -12,8 +12,11 @@ type GameState = {
   activePlayer?: PlayerColor;
   round: number;
   surpriseTokens: SurpriseToken[];
-  fishes: SquareWithAFish[];
+  fishPositions: FishAtPosition[];
+  nbMoves: number;
+  selectedFishPosition: Position | null;
 }
 
-export type SquareWithAFish = {squareId: number; fish: Fish};
+export type Position = {X: number; Y: number;}
+export type FishAtPosition = {position: Position; fish: Fish};
 export default GameState

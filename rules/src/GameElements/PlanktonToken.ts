@@ -2,12 +2,5 @@ import { SymbolEnum } from "./Symbols";
 
 export interface PlanktonToken {
   isAvailable: boolean;
-  color: PlanktonColor;
+  color: SymbolEnum.PLANKTON_BLUE | SymbolEnum.PLANKTON_GREEN | SymbolEnum.PLANKTON_RED | SymbolEnum.PLANKTON_YELLOW;
 }
-
-export enum PlanktonColor { 
-  RED = SymbolEnum.PLANKTON_RED,
-  YELLOW = SymbolEnum.PLANKTON_YELLOW,
-  BLUE = SymbolEnum.PLANKTON_BLUE,
-  GREEN = SymbolEnum.PLANKTON_GREEN
-};

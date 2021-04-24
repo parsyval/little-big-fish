@@ -1,10 +1,10 @@
 import shuffle from 'lodash.shuffle';
-import { Board, Board1, Board2, Board3, Board4, BoardView } from "./GameElements/Board";
+import { Board, Board1, Board2, Board3, Board4, BoardView, Square } from "./GameElements/Board";
 import { FishSizeEnum } from "./GameElements/Fish";
-import { PlanktonColor } from "./GameElements/PlanktonToken";
 import { SurpriseToken, SurpriseTokenEnum } from "./GameElements/SurpriseToken";
-import { SymbolEnum } from "./GameElements/Symbols";
-import { SquareWithAFish } from './GameState';
+import { SymbolEnum } from './GameElements/Symbols';
+import { FishAtPosition, Position } from './GameState';
+import { MoveFish, moveFishMove } from './moves/MoveFish';
 import PlayerColor from "./PlayerColor";
 import PlayerState from "./PlayerState";
 
@@ -21,10 +21,10 @@ export abstract class LBFUtils {
       availableFish,
       capturedFishes: 0,
       planktonTokens: [
-        {color: PlanktonColor.RED, isAvailable: true},
-        {color: PlanktonColor.BLUE, isAvailable: true},
-        {color: PlanktonColor.YELLOW, isAvailable: true},
-        {color: PlanktonColor.GREEN, isAvailable: true},
+        {color: SymbolEnum.PLANKTON_BLUE, isAvailable: true},
+        {color: SymbolEnum.PLANKTON_RED, isAvailable: true},
+        {color: SymbolEnum.PLANKTON_GREEN, isAvailable: true},
+        {color: SymbolEnum.PLANKTON_YELLOW, isAvailable: true},
       ]     
     }
   }
@@ -77,16 +77,37 @@ export abstract class LBFUtils {
     return boards.map(LBFUtils.getBoardViewFromBoard);
   }
 
-  public static getStartPlacementIds(color: PlayerColor, boards: Board[], fishes: SquareWithAFish[]): number[]{
-    const boardViews: BoardView[] = LBFUtils.getBoardViews(boards);
-    const line = color === PlayerColor.PINK
-      ? [...boardViews[0].squares[0], ...boardViews[1].squares[0]] 
-      : [...boardViews[2].squares[2], ...boardViews[3].squares[2]];
+  public static getSquareMatrix(views: BoardView[]): Square[][] {
+    return [
+      [...views[0].squares[0], ...views[1].squares[0]],
+      [...views[0].squares[1], ...views[1].squares[1]],
+      [...views[0].squares[2], ...views[1].squares[2]],
+      [...views[2].squares[0], ...views[3].squares[0]],
+      [...views[2].squares[1], ...views[3].squares[1]],
+      [...views[2].squares[2], ...views[3].squares[2]],
+    ]
+  }
 
-    const result = line.filter(square => square.type === SymbolEnum.OCEAN)
-      .filter(square => !fishes.some(f => f.squareId === square.id))
-      .map(square => square.id);
+  public static getStartPositionsWithoutFish(color: PlayerColor, fishes: FishAtPosition[]): Position[]{
+    return (color === PlayerColor.PINK 
+      ? [{X: 0, Y: 0}, {X: 2, Y: 0}, {X: 3, Y: 0}, {X: 5, Y: 0}]  // Pink got the first line
+      : [{X: 0, Y: 5}, {X: 2, Y: 5}, {X: 3, Y: 5}, {X: 5, Y: 5}]) // Orange got the last line
+      .filter(p => !fishes.some(f => f.position.X === p.X && f.position.Y === p.Y)); // Remove the postions that already have a fish on it
+  }
 
-    return result;
+  public static isPlanktonSymbol(symbol: SymbolEnum): boolean {
+    return symbol === SymbolEnum.PLANKTON_BLUE || symbol === SymbolEnum.PLANKTON_GREEN 
+      || symbol === SymbolEnum.PLANKTON_RED || symbol === SymbolEnum.PLANKTON_YELLOW || symbol === SymbolEnum.PLANKTON;
+  }
+
+  public static getPossibleMoves(fp: FishAtPosition, squares: Square[][]): MoveFish[] {
+    return [
+      {X: fp.position.X - 1, Y: fp.position.Y - 1}, 
+      {X: fp.position.X + 1, Y: fp.position.Y - 1}, 
+      {X: fp.position.X - 1, Y: fp.position.Y + 1}, 
+      {X: fp.position.X + 1, Y: fp.position.Y + 1}]
+      .filter(position => position.X >= 0 || position.X < 6 || position.Y >= 0 || position.Y < 6)
+      .filter(position => fp.fish.size !== FishSizeEnum.SMALL && squares[position.X][position.Y].type === SymbolEnum.WRECK)
+      .map(position => moveFishMove(fp.position, position));
   }
 }

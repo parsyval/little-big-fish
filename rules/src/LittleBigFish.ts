@@ -1,20 +1,23 @@
-import { IncompleteInformation, SequentialGame } from '@gamepark/rules-api'
-import { shuffle } from 'lodash'
-import { Board, Board1, Board2, Board3, Board4 } from './GameElements/Board'
-import { FishSizeEnum } from './GameElements/Fish'
-import { SurpriseToken } from './GameElements/SurpriseToken'
-import GameState from './GameState'
-import GameView from './GameView'
-import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions'
-import { LBFUtils } from './LittleBigFishUtils'
-import Move from './moves/Move'
-import MoveType from './moves/MoveType'
-import MoveView from './moves/MoveView'
-import { placeFish, placeFishMove } from './moves/PlaceFish'
-import { switchPlayer } from './moves/SwitchPlayer'
-import { Phase, startPhase } from './Phase'
-import PlayerColor from './PlayerColor'
-import PlayerState from './PlayerState'
+import { IncompleteInformation, SequentialGame } from '@gamepark/rules-api';
+import { shuffle } from 'lodash';
+import { Board, Board1, Board2, Board3, Board4 } from './GameElements/Board';
+import { FishSizeEnum } from './GameElements/Fish';
+import { SurpriseToken } from './GameElements/SurpriseToken';
+import { SymbolEnum } from './GameElements/Symbols';
+import GameState from './GameState';
+import GameView from './GameView';
+import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions';
+import { LBFUtils } from './LittleBigFishUtils';
+import Move from './moves/Move';
+import MoveType from './moves/MoveType';
+import MoveView from './moves/MoveView';
+import { placeFish, placeFishMove } from './moves/PlaceFish';
+import { selectFishMove } from './moves/SelectFish';
+import { switchPlayer } from './moves/SwitchPlayer';
+import { upgradeFishMove } from './moves/UpgradeFish';
+import { Phase, startPhase } from './Phase';
+import PlayerColor from './PlayerColor';
+import PlayerState from './PlayerState';
 
 /**
  * Your Board Game rules must extend either "SequentialGame" or "SimultaneousGame".
@@ -23,38 +26,41 @@ import PlayerState from './PlayerState'
  * If the game contains information that some players know, but the other players does not, it must implement "SecretInformation" instead.
  * Later on, you can also implement "Competitive", "Undo", "TimeLimit" and "Eliminations" to add further features to the game.
  */
-export default class LittleBigFish extends SequentialGame<GameState, Move, PlayerColor>
+export default class LittleBigFish
+  extends SequentialGame<GameState, Move, PlayerColor>
   implements IncompleteInformation<GameState, GameView, Move, MoveView, PlayerColor> {
   /**
    * This constructor is called when the game "restarts" from a previously saved state.
    * @param state The state of the game
    */
-  constructor(state: GameState)
+  constructor(state: GameState);
   /**
    * This constructor is called when a new game is created. If your game has options, or a variable number of players, it will be provided here.
    * @param options The options of the new game
    */
-  constructor(options: LittleBigFishOptions)
+  constructor(options: LittleBigFishOptions);
   /**
    * In here you must code the construction of your class. Use a "typeguard" to distinguish a new game from a restored game.
    * @param arg The state of the game, or the options when starting a new game
    */
   constructor(arg: GameState | LittleBigFishOptions) {
     if (isGameOptions(arg)) {
-      const boards: Board[] = shuffle([Board1, Board2, Board3, Board4].map(b => ({id: b.id, rotation: Math.floor(Math.random() * 4)})));
+      const boards: Board[] = shuffle([Board1, Board2, Board3, Board4].map(b => ({ id: b.id, rotation: Math.floor(Math.random() * 4) })));
       const surpriseTokens: SurpriseToken[] = LBFUtils.initSupriseTokens();
       const players: PlayerState[] = arg.players.map(playerOptions => LBFUtils.getInitialPlayerState(playerOptions.id));
       super({
         players,
-        round: 1, 
-        boards, 
+        round: 1,
+        boards,
         surpriseTokens,
         phase: Phase.START,
         activePlayer: arg.players[0].id,
-        fishes: []
+        fishPositions: [],
+        selectedFishPosition: null,
+        nbMoves: 0
       });
     } else {
-      super(arg)
+      super(arg);
     }
   }
 
@@ -64,15 +70,12 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return The identifier of the player whose turn it is
    */
   getActivePlayer(): PlayerColor | undefined {
-    return this.state.phase === Phase.PLAY 
-    && (this.state.players.some(p => p.capturedFishes === 5)
-    || this.state.fishes.filter(f => f.fish.color === PlayerColor.ORANGE).length === 1
-    || this.state.fishes.filter(f => f.fish.color === PlayerColor.PINK).length === 1)
-    ? undefined : this.state.activePlayer;
-  }
-
-  getActivePlayerState(color: PlayerColor): PlayerState {
-    return this.state.players.find(p => p.color === color)!;
+    return this.state.phase === Phase.PLAY &&
+      (this.state.players.some(p => p.capturedFishes === 5) ||
+        this.state.fishPositions.filter(f => f.fish.color === PlayerColor.ORANGE).length === 1 ||
+        this.state.fishPositions.filter(f => f.fish.color === PlayerColor.PINK).length === 1)
+      ? undefined
+      : this.state.activePlayer;
   }
 
   /**
@@ -89,13 +92,20 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
     const legalMoves: Move[] = [];
     const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
 
-    if(this.state.phase === Phase.START) {
-      if(player.availableFish[FishSizeEnum.SMALL] > 3){
-        LBFUtils.getStartPlacementIds(player.color, this.state.boards, this.state.fishes).forEach(id => legalMoves.push(
-          placeFishMove({size: FishSizeEnum.SMALL, color: player.color}, id)
-        ));
-      } else if(this.state.players.every(p => p.availableFish[FishSizeEnum.SMALL] === 3)) {
-        legalMoves.push({type: MoveType.START_PHASE, phase: Phase.PLAY})
+    if (this.state.phase === Phase.START) {
+      if (player.availableFish[FishSizeEnum.SMALL] > 3) {
+        LBFUtils.getStartPositionsWithoutFish(player.color, this.state.fishPositions).forEach(p =>
+          legalMoves.push(placeFishMove({ size: FishSizeEnum.SMALL, color: player.color }, p))
+        );
+      }
+    } else {
+      if (this.state.selectedFishPosition) {
+        const fishAtPosition = this.state.fishPositions.find(fp => fp.position.X === this.state.selectedFishPosition?.X && fp.position.Y === this.state.selectedFishPosition.Y)!;
+        legalMoves.push(...LBFUtils.getPossibleMoves(fishAtPosition, LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))));
+      } else {
+        this.state.fishPositions.filter(fp => fp.fish.color === player.color).forEach(fp =>
+          legalMoves.push(selectFishMove(fp.position))
+        );
       }
     }
 
@@ -113,7 +123,7 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
         return placeFish(this.state, move);
       case MoveType.SWITCH_PLAYER:
         return switchPlayer(this.state);
-      case MoveType.START_PHASE: 
+      case MoveType.START_PHASE:
         return startPhase(this.state, move);
     }
   }
@@ -132,19 +142,34 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return The next automatic consequence that should be played in current game state.
    */
   getAutomaticMove(): void | Move {
-    if(!this.getActivePlayer()) return;
+    const activePlayerColor = this.getActivePlayer();
+    if (activePlayerColor) {
+      if (this.state.phase === Phase.START) {
+        if (this.state.players.find(p => p.color === activePlayerColor)?.availableFish[FishSizeEnum.SMALL] === 3) {
+          if (this.state.players.find(p => p.color !== activePlayerColor)?.availableFish[FishSizeEnum.SMALL] === 3) {
+            return { type: MoveType.START_PHASE, phase: Phase.PLAY };
+          }
 
-    if(this.state.phase === Phase.START) {
-      if(this.getActivePlayerState(this.getActivePlayer()!).availableFish[FishSizeEnum.SMALL] === 3) {
-        if (this.state.players.find(p => p.color !== this.getActivePlayer()!)?.availableFish[FishSizeEnum.SMALL] === 3) {
-          return {type: MoveType.START_PHASE, phase: Phase.PLAY};
+          return { type: MoveType.SWITCH_PLAYER };
         }
-        
-        return {type: MoveType.SWITCH_PLAYER};
+      } else {
+        if(this.state.nbMoves === 2) {
+          return { type: MoveType.SWITCH_PLAYER };
+        } else {
+          const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
+          const fishOnWreck = this.state.fishPositions.find(fp => squaresMatrix[fp.position.X][fp.position.Y].type === SymbolEnum.WRECK);
+          const fishOnPlankton = this.state.fishPositions.find(fp => LBFUtils.isPlanktonSymbol(squaresMatrix[fp.position.X][fp.position.Y].type));
+          
+          if(fishOnWreck) {
+            return selectFishMove(fishOnWreck.position);
+          } else if(fishOnPlankton && fishOnPlankton.fish.size !== FishSizeEnum.BIG) {
+            return upgradeFishMove(fishOnPlankton.position);
+          }
+        }
       }
     }
 
-    return
+    return;
   }
 
   /**
@@ -164,6 +189,6 @@ export default class LittleBigFish extends SequentialGame<GameState, Move, Playe
    * @return What a person should know about the move that was played
    */
   getMoveView(move: Move): MoveView {
-    return move
+    return move;
   }
 }
