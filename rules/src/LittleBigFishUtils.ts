@@ -90,8 +90,8 @@ export abstract class LBFUtils {
 
   public static getStartPositionsWithoutFish(color: PlayerColor, fishes: FishAtPosition[]): Position[]{
     return (color === PlayerColor.PINK 
-      ? [{X: 0, Y: 0}, {X: 2, Y: 0}, {X: 3, Y: 0}, {X: 5, Y: 0}]  // Pink got the first line
-      : [{X: 0, Y: 5}, {X: 2, Y: 5}, {X: 3, Y: 5}, {X: 5, Y: 5}]) // Orange got the last line
+      ? [{X: 0, Y: 0}, {X: 0, Y: 2}, {X: 0, Y: 3}, {X: 0, Y: 5}]  // Pink got the left column
+      : [{X: 5, Y: 0}, {X: 5, Y: 2}, {X: 5, Y: 3}, {X: 5, Y: 5}]) // Orange got the right column
       .filter(p => !fishes.some(f => f.position.X === p.X && f.position.Y === p.Y)); // Remove the postions that already have a fish on it
   }
 
@@ -100,14 +100,26 @@ export abstract class LBFUtils {
       || symbol === SymbolEnum.PLANKTON_RED || symbol === SymbolEnum.PLANKTON_YELLOW || symbol === SymbolEnum.PLANKTON;
   }
 
-  public static getPossibleMoves(fp: FishAtPosition, squares: Square[][]): MoveFish[] {
+  public static getPossibleMoves(fp: FishAtPosition | null, squares: Square[][], fishPositions: FishAtPosition[]): MoveFish[] {
+    if (!fp) return [];
+
+    const biggerFishes = fishPositions.filter(otherFishPos => 
+      fp.fish.size === FishSizeEnum.SMALL 
+        ? otherFishPos.fish.size === FishSizeEnum.MEDIUM || otherFishPos.fish.size === FishSizeEnum.BIG
+        : fp.fish.size === FishSizeEnum.MEDIUM
+          ? otherFishPos.fish.size === FishSizeEnum.BIG
+          : false
+    );
+
     return [
-      {X: fp.position.X - 1, Y: fp.position.Y - 1}, 
-      {X: fp.position.X + 1, Y: fp.position.Y - 1}, 
-      {X: fp.position.X - 1, Y: fp.position.Y + 1}, 
-      {X: fp.position.X + 1, Y: fp.position.Y + 1}]
-      .filter(position => position.X >= 0 || position.X < 6 || position.Y >= 0 || position.Y < 6)
-      .filter(position => fp.fish.size !== FishSizeEnum.SMALL && squares[position.X][position.Y].type === SymbolEnum.WRECK)
-      .map(position => moveFishMove(fp.position, position));
+      {X: fp.position.X, Y: fp.position.Y - 1}, 
+      {X: fp.position.X, Y: fp.position.Y + 1}, 
+      {X: fp.position.X - 1, Y: fp.position.Y}, 
+      {X: fp.position.X + 1, Y: fp.position.Y},
+    ]
+    .filter(position => position.X >= 0 && position.X < 6 && position.Y >= 0 && position.Y < 6)
+    .filter(position => !(fp.fish.size !== FishSizeEnum.SMALL && squares[position.Y][position.X].type === SymbolEnum.WRECK))
+    .filter(position => !biggerFishes.find(biggerFish => position.X === biggerFish.position.X && position.Y === biggerFish.position.Y))
+    .map(position => moveFishMove(fp.position, position));
   }
 }

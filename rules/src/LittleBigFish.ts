@@ -9,12 +9,13 @@ import GameView from './GameView';
 import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions';
 import { LBFUtils } from './LittleBigFishUtils';
 import Move from './moves/Move';
+import { moveFish } from './moves/MoveFish';
 import MoveType from './moves/MoveType';
 import MoveView from './moves/MoveView';
 import { placeFish, placeFishMove } from './moves/PlaceFish';
-import { selectFishMove } from './moves/SelectFish';
+import { selectFish, selectFishMove } from './moves/SelectFish';
 import { switchPlayer } from './moves/SwitchPlayer';
-import { upgradeFishMove } from './moves/UpgradeFish';
+import { upgradeFish, upgradeFishMove } from './moves/UpgradeFish';
 import { Phase, startPhase } from './Phase';
 import PlayerColor from './PlayerColor';
 import PlayerState from './PlayerState';
@@ -56,7 +57,7 @@ export default class LittleBigFish
         phase: Phase.START,
         activePlayer: arg.players[0].id,
         fishPositions: [],
-        selectedFishPosition: null,
+        selectedFish: null,
         nbMoves: 0
       });
     } else {
@@ -70,12 +71,16 @@ export default class LittleBigFish
    * @return The identifier of the player whose turn it is
    */
   getActivePlayer(): PlayerColor | undefined {
-    return this.state.phase === Phase.PLAY &&
+    const activePlayer = this.state.phase === Phase.PLAY &&
       (this.state.players.some(p => p.capturedFishes === 5) ||
         this.state.fishPositions.filter(f => f.fish.color === PlayerColor.ORANGE).length === 1 ||
         this.state.fishPositions.filter(f => f.fish.color === PlayerColor.PINK).length === 1)
       ? undefined
       : this.state.activePlayer;
+
+    console.log('ActivePlayer', activePlayer);
+
+    return activePlayer;
   }
 
   /**
@@ -95,17 +100,31 @@ export default class LittleBigFish
     if (this.state.phase === Phase.START) {
       if (player.availableFish[FishSizeEnum.SMALL] > 3) {
         LBFUtils.getStartPositionsWithoutFish(player.color, this.state.fishPositions).forEach(p =>
-          legalMoves.push(placeFishMove({ size: FishSizeEnum.SMALL, color: player.color }, p))
+          legalMoves.push(placeFishMove(p))
         );
       }
     } else {
-      if (this.state.selectedFishPosition) {
-        const fishAtPosition = this.state.fishPositions.find(fp => fp.position.X === this.state.selectedFishPosition?.X && fp.position.Y === this.state.selectedFishPosition.Y)!;
-        legalMoves.push(...LBFUtils.getPossibleMoves(fishAtPosition, LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))));
+      if (this.state.selectedFish) {
+        const fishAtPosition = this.state.fishPositions.find(fp => 
+          fp.position.X === this.state.selectedFish!.position.X && fp.position.Y === this.state.selectedFish!.position.Y
+        )!;
+        legalMoves.push(...LBFUtils.getPossibleMoves(
+          fishAtPosition, 
+          LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards)),
+          this.state.fishPositions
+        ));
       } else {
-        this.state.fishPositions.filter(fp => fp.fish.color === player.color).forEach(fp =>
-          legalMoves.push(selectFishMove(fp.position))
-        );
+        const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
+        const fishes = this.state.fishPositions.filter(fp => !fp.fish.hasBeenUpdated);
+        const fishOnBirth = fishes.find(fp => squaresMatrix[fp.position.Y][fp.position.X].type === SymbolEnum.BIRTH);
+
+        if(fishOnBirth) {
+          // TODO
+        } else {
+          this.state.fishPositions.filter(fp => fp.fish.color === player.color).forEach(fp =>
+            legalMoves.push(selectFishMove(fp))
+          );
+        }
       }
     }
 
@@ -123,6 +142,12 @@ export default class LittleBigFish
         return placeFish(this.state, move);
       case MoveType.SWITCH_PLAYER:
         return switchPlayer(this.state);
+      case MoveType.SELECT_FISH:
+        return selectFish(this.state, move);
+      case MoveType.MOVE_FISH:
+        return moveFish(this.state, move);
+      case MoveType.UPGRADE_FISH:
+        return upgradeFish(this.state, move);
       case MoveType.START_PHASE:
         return startPhase(this.state, move);
     }
@@ -154,22 +179,31 @@ export default class LittleBigFish
         }
       } else {
         if(this.state.nbMoves === 2) {
+          this.state.nbMoves = 0;
           return { type: MoveType.SWITCH_PLAYER };
         } else {
           const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
-          const fishOnWreck = this.state.fishPositions.find(fp => squaresMatrix[fp.position.X][fp.position.Y].type === SymbolEnum.WRECK);
-          const fishOnPlankton = this.state.fishPositions.find(fp => LBFUtils.isPlanktonSymbol(squaresMatrix[fp.position.X][fp.position.Y].type));
+          const fishes = this.state.fishPositions.filter(fp => !fp.fish.hasBeenUpdated);
+          const fishOnWreck = fishes.find(fp => squaresMatrix[fp.position.Y][fp.position.X].type === SymbolEnum.WRECK);
+          const fishOnPlankton = fishes.find(fp => LBFUtils.isPlanktonSymbol(squaresMatrix[fp.position.Y][fp.position.X].type));
           
           if(fishOnWreck) {
-            return selectFishMove(fishOnWreck.position);
-          } else if(fishOnPlankton && fishOnPlankton.fish.size !== FishSizeEnum.BIG) {
-            return upgradeFishMove(fishOnPlankton.position);
+            fishOnWreck.fish.hasBeenUpdated = true;
+            return selectFishMove(fishOnWreck);
+          } 
+          if(fishOnPlankton && fishOnPlankton.fish.size !== FishSizeEnum.BIG) {
+            const square = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))[fishOnPlankton.position.Y][fishOnPlankton.position.X];
+            const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
+            const planktonToken = player.planktonTokens.find(pt => pt.color === square.type);
+            
+            if (planktonToken && planktonToken.isAvailable) {
+              planktonToken.isAvailable = false;
+              return upgradeFishMove(fishOnPlankton.position);
+            }
           }
         }
       }
     }
-
-    return;
   }
 
   /**

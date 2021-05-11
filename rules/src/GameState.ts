@@ -14,7 +14,7 @@ type GameState = {
   surpriseTokens: SurpriseToken[];
   fishPositions: FishAtPosition[];
   nbMoves: number;
-  selectedFishPosition: Position | null;
+  selectedFish: FishAtPosition | null;
 }
 
 export type Position = {X: number; Y: number;}

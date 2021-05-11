@@ -1,46 +1,39 @@
 /** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react";
-import { FishSizeEnum } from "@gamepark/little-big-fish/GameElements/Fish";
 import PlayerState from "@gamepark/little-big-fish/PlayerState";
 import { FunctionComponent } from "react";
-import { Fish } from "../Fish/Fish";
-import { PlanktonToken } from "../Plankton/Plankton";
 
-type PlayerSideProps = {
+type PlayerSideProps = React.HTMLAttributes<HTMLElement> & {
   playerState: PlayerState;
 }
 
-export const PlayerSide: FunctionComponent<PlayerSideProps> = ({playerState}) => {
+export const PlayerSide: FunctionComponent<PlayerSideProps> = ({playerState, ...props}) => {
+  return <div>PlayerSide</div>
+  // return (
+  //   <div css={css`position: absolute; height: 100%; width: 15%`} {...props}>
+  //     <div css={css`height: 25%`}>
+  //       {Array.from({length: playerState.availableFish[FishSizeEnum.SMALL]}).map((_, i) => 
+  //         <FishElem fish={{size: FishSizeEnum.SMALL, color: playerState.color}} css={css`width: 25%;`} key={i}></FishElem>
+  //       )
+  //       }
+  //     </div>
 
-  return (
-    <div css={css`position: absolute; height: 100%; width: 15%`}>
-      <div css={css`height: 25%`}>
-        {Array.from({length: playerState.availableFish[FishSizeEnum.SMALL]}).map((_, i) => 
-          <span key={i} css={css`width: 20%; float: left`}>
-            <Fish size={FishSizeEnum.SMALL} color={playerState.color}></Fish>
-          </span>)
-        }
-      </div>
+  //     <div css={css`height: 25%;`}>
+  //       {Array.from({length: playerState.availableFish[FishSizeEnum.MEDIUM]}).map((_, i) =>
+  //         <FishElem fish={{size: FishSizeEnum.MEDIUM, color: playerState.color}} css={css`width: 25%;`} key={i}></FishElem>
+  //       )
+  //       }
+  //     </div>
 
-      <div css={css`height: 25%;`}>
-        {Array.from({length: playerState.availableFish[FishSizeEnum.MEDIUM]}).map((_, i) => 
-          <span key={i} css={css`width: 20%; float: left`}>
-            <Fish size={FishSizeEnum.MEDIUM} color={playerState.color}></Fish>
-          </span>)
-        }
-      </div>
+  //     <div css={css`height: 25%;`}>
+  //       {Array.from({length: playerState.availableFish[FishSizeEnum.BIG]}).map((_, i) =>
+  //         <FishElem fish={{size: FishSizeEnum.BIG, color: playerState.color}} css={css`width: 25%;`} key={i}></FishElem>
+  //       )
+  //       }
+  //     </div>
 
-      <div css={css`height: 25%;`}>
-        {Array.from({length: playerState.availableFish[FishSizeEnum.BIG]}).map((_, i) => 
-          <span key={i} css={css`width: 20%; float: left`}>
-            <Fish size={FishSizeEnum.BIG} color={playerState.color}></Fish>
-          </span>)
-        }
-      </div>
-
-      <div css={css`height: 25%;`}>
-        {Array.from(playerState.planktonTokens.filter(t => t.isAvailable).map((t, i) => <PlanktonToken key={i} color={t.color}></PlanktonToken>))}
-      </div>
-    </div>
-  );
+  //     <div css={css`height: 25%;`}>
+  //       {Array.from(playerState.planktonTokens.filter(t => t.isAvailable).map((t, i) => <PlanktonToken key={i} color={t.color}></PlanktonToken>))}
+  //     </div>
+  //   </div>
+  // );
 }

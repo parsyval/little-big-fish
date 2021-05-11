@@ -1,9 +1,12 @@
 import { Game } from '@gamepark/rules-api'
 import GameView from './GameView'
+import { moveFish } from './moves/MoveFish'
 import MoveType from './moves/MoveType'
 import MoveView from './moves/MoveView'
 import { placeFish } from './moves/PlaceFish'
+import { selectFish } from './moves/SelectFish'
 import { switchPlayer } from './moves/SwitchPlayer'
+import { upgradeFish } from './moves/UpgradeFish'
 import { startPhase } from './Phase'
 
 /**
@@ -40,6 +43,12 @@ export default class LittleBigFishView implements Game<GameView, MoveView> {
         return placeFish(this.state, move);
       case MoveType.SWITCH_PLAYER:
         return switchPlayer(this.state);
+      case MoveType.SELECT_FISH:
+        return selectFish(this.state, move);
+      case MoveType.MOVE_FISH:
+        return moveFish(this.state, move);
+      case MoveType.UPGRADE_FISH:
+        return upgradeFish(this.state, move);
       case MoveType.START_PHASE: 
         return startPhase(this.state, move);
     }

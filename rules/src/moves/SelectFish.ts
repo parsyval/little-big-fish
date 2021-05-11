@@ -1,15 +1,15 @@
-import GameState, { Position } from "../GameState";
+import GameState, { FishAtPosition } from "../GameState";
 import MoveType from "./MoveType";
 
 export type SelectFish = {
   type: MoveType.SELECT_FISH,
-  position: Position, 
+  fishAtPos: FishAtPosition, 
 }
 
-export function selectFishMove(position: Position): SelectFish {
-  return {type: MoveType.SELECT_FISH, position};
+export function selectFishMove(fishAtPos: FishAtPosition): SelectFish {
+  return {type: MoveType.SELECT_FISH, fishAtPos};
 }
 
-export function placeFish(state: GameState, move: SelectFish): void {
-  state.selectedFishPosition = move.position;
+export function selectFish(state: GameState, move: SelectFish): void {
+  state.selectedFish = move.fishAtPos;
 }
