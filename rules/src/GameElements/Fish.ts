@@ -3,7 +3,7 @@ import PlayerColor from "../PlayerColor";
 export interface Fish {
   size: FishSizeEnum;
   color: PlayerColor;
-  hasBeenUpdated?: boolean;
+  hasJustMoved: boolean;
 }
 
 export enum FishSizeEnum { SMALL, MEDIUM, BIG };

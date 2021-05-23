@@ -27,15 +27,14 @@ export function moveFish(state: GameState, move: MoveFish) {
     state.players.find(p => p.color === state.activePlayer)!.capturedFishes++;
   }
 
-  fish.hasBeenUpdated = false;
+  fish.hasJustMoved = true;
 
   state.fishPositions.push({fish, position: move.toPosition});
   
   const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards));
-  const fishes = state.fishPositions.filter(fp => !fp.fish.hasBeenUpdated);
-  const fishOnWreck = fishes.find(fp => squaresMatrix[fp.position.Y][fp.position.X].type === SymbolEnum.WRECK);
+  const isFishOnWreck = squaresMatrix[move.toPosition.Y][move.toPosition.X].type === SymbolEnum.WRECK;
   
-  if(!fishOnWreck) {
+  if(!isFishOnWreck) {
     // Does not count move when moving from a shipwreck
     state.nbMoves++;
   }

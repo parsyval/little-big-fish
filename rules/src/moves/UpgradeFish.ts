@@ -18,6 +18,6 @@ export function upgradeFish(state: GameState, move: UpgradeFish) {
   state.fishPositions.push({position: move.position, fish: {
     color: fish.color,
     size: fish.size === FishSizeEnum.SMALL ? FishSizeEnum.MEDIUM : FishSizeEnum.BIG,
-    hasBeenUpdated: true,
+    hasJustMoved: false,
   }});
 }

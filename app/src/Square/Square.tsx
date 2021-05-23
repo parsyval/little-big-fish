@@ -22,26 +22,26 @@ export const SQUARE_H = 16.5;
 export const Square: FunctionComponent<SquareProps> = ({squareId, position, gameState, playerColor}) => {
   const play = usePlay()
 
-  const isStartPhaseAndClickable = () => 
+  const isPlaceStartFish = (): boolean => 
     gameState.activePlayer! === playerColor && gameState.phase === Phase.START 
     && LBFUtils.getStartPositionsWithoutFish(playerColor, gameState.fishPositions)
       .some(pos => pos.X === position.X && pos.Y === position.Y);
 
-  const isPlayPhaseAndClickable = () =>
+  const isPossibleMove = (): boolean =>
     gameState.activePlayer! === playerColor && gameState.phase === Phase.PLAY
-      && LBFUtils.getPossibleMoves(gameState.selectedFish, LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(gameState.boards)), gameState.fishPositions)
+      && LBFUtils.getPossibleMoves(gameState.selectedFish, gameState)
       .some(move => move.toPosition.X === position.X && move.toPosition.Y === position.Y);
 
-  const onClick = () => {
-    if(isStartPhaseAndClickable()) {
+  const onClick = (): void => {
+    if(isPlaceStartFish()) {
       play(placeFishMove(position));
-    } else if(isPlayPhaseAndClickable()) {
+    } else if(isPossibleMove()) {
       play(moveFishMove({X: gameState.selectedFish!.position.X, Y: gameState.selectedFish!.position.Y}, position));
     }
   }
 
-  const isClickable = () => {
-    return isStartPhaseAndClickable() || isPlayPhaseAndClickable();
+  const isClickable = (): boolean => {
+    return isPlaceStartFish() || isPossibleMove();
   }
 
   const isClickableCss = () => css`

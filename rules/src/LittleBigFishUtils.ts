@@ -3,7 +3,7 @@ import { Board, Board1, Board2, Board3, Board4, BoardView, Square } from "./Game
 import { FishSizeEnum } from "./GameElements/Fish";
 import { SurpriseToken, SurpriseTokenEnum } from "./GameElements/SurpriseToken";
 import { SymbolEnum } from './GameElements/Symbols';
-import { FishAtPosition, Position } from './GameState';
+import GameState, { FishAtPosition, Position } from './GameState';
 import { MoveFish, moveFishMove } from './moves/MoveFish';
 import PlayerColor from "./PlayerColor";
 import PlayerState from "./PlayerState";
@@ -100,16 +100,20 @@ export abstract class LBFUtils {
       || symbol === SymbolEnum.PLANKTON_RED || symbol === SymbolEnum.PLANKTON_YELLOW || symbol === SymbolEnum.PLANKTON;
   }
 
-  public static getPossibleMoves(fp: FishAtPosition | null, squares: Square[][], fishPositions: FishAtPosition[]): MoveFish[] {
+  public static getPossibleMoves(fp: FishAtPosition | null, state: GameState): MoveFish[] {
     if (!fp) return [];
 
-    const biggerFishes = fishPositions.filter(otherFishPos => 
-      fp.fish.size === FishSizeEnum.SMALL 
+    const squares = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards))
+
+    const biggerFishes = state.fishPositions.filter(otherFishPos => {
+      if(otherFishPos.fish.color === state.activePlayer) return false;
+
+      return fp.fish.size === FishSizeEnum.SMALL 
         ? otherFishPos.fish.size === FishSizeEnum.MEDIUM || otherFishPos.fish.size === FishSizeEnum.BIG
         : fp.fish.size === FishSizeEnum.MEDIUM
           ? otherFishPos.fish.size === FishSizeEnum.BIG
-          : false
-    );
+          : false;
+    });
 
     return [
       {X: fp.position.X, Y: fp.position.Y - 1}, 

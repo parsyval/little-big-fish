@@ -108,14 +108,10 @@ export default class LittleBigFish
         const fishAtPosition = this.state.fishPositions.find(fp => 
           fp.position.X === this.state.selectedFish!.position.X && fp.position.Y === this.state.selectedFish!.position.Y
         )!;
-        legalMoves.push(...LBFUtils.getPossibleMoves(
-          fishAtPosition, 
-          LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards)),
-          this.state.fishPositions
-        ));
+        legalMoves.push(...LBFUtils.getPossibleMoves(fishAtPosition, this.state));
       } else {
         const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
-        const fishes = this.state.fishPositions.filter(fp => !fp.fish.hasBeenUpdated);
+        const fishes = this.state.fishPositions.filter(fp => !fp.fish.hasJustMoved);
         const fishOnBirth = fishes.find(fp => squaresMatrix[fp.position.Y][fp.position.X].type === SymbolEnum.BIRTH);
 
         if(fishOnBirth) {
@@ -183,22 +179,27 @@ export default class LittleBigFish
           return { type: MoveType.SWITCH_PLAYER };
         } else {
           const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
-          const fishes = this.state.fishPositions.filter(fp => !fp.fish.hasBeenUpdated);
-          const fishOnWreck = fishes.find(fp => squaresMatrix[fp.position.Y][fp.position.X].type === SymbolEnum.WRECK);
-          const fishOnPlankton = fishes.find(fp => LBFUtils.isPlanktonSymbol(squaresMatrix[fp.position.Y][fp.position.X].type));
-          
-          if(fishOnWreck) {
-            fishOnWreck.fish.hasBeenUpdated = true;
-            return selectFishMove(fishOnWreck);
-          } 
-          if(fishOnPlankton && fishOnPlankton.fish.size !== FishSizeEnum.BIG) {
-            const square = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))[fishOnPlankton.position.Y][fishOnPlankton.position.X];
-            const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
-            const planktonToken = player.planktonTokens.find(pt => pt.color === square.type);
+          const fpThatJustMoved = this.state.fishPositions.find(fp => fp.fish.hasJustMoved);
+          if (fpThatJustMoved) {
+            const pos = fpThatJustMoved.position;
+            const isFishOnWreck = squaresMatrix[pos.Y][pos.X].type === SymbolEnum.WRECK;
+            const isFishOnPlankton = LBFUtils.isPlanktonSymbol(squaresMatrix[pos.Y][pos.X].type);
             
-            if (planktonToken && planktonToken.isAvailable) {
-              planktonToken.isAvailable = false;
-              return upgradeFishMove(fishOnPlankton.position);
+            fpThatJustMoved.fish.hasJustMoved = false;
+
+            if(isFishOnWreck) {
+              return selectFishMove(fpThatJustMoved);
+            } 
+
+            if(isFishOnPlankton && fpThatJustMoved.fish.size !== FishSizeEnum.BIG) {
+              const square = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))[pos.Y][pos.X];
+              const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
+              const planktonToken = player.planktonTokens.find(pt => pt.color === square.type);
+              
+              if (planktonToken && planktonToken.isAvailable) {
+                planktonToken.isAvailable = false;
+                return upgradeFishMove(pos);
+              }
             }
           }
         }
