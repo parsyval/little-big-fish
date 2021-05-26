@@ -6,7 +6,7 @@ type PlayerSideProps = React.HTMLAttributes<HTMLElement> & {
   playerState: PlayerState;
 }
 
-export const PlayerSide: FunctionComponent<PlayerSideProps> = ({playerState, ...props}) => {
+export const PlayerSide: FunctionComponent<PlayerSideProps> = () => {
   return <div>PlayerSide</div>
   // return (
   //   <div css={css`position: absolute; height: 100%; width: 15%`} {...props}>

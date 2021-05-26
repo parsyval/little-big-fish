@@ -1,5 +1,6 @@
 import { FishSizeEnum } from "../GameElements/Fish";
 import GameState, { Position } from "../GameState";
+import GameView from "../GameView";
 import MoveType from "./MoveType";
 
 export type PlaceFish = {
@@ -14,7 +15,7 @@ export function placeFishMove(position: Position): PlaceFish {
   }
 }
 
-export function placeFish(state: GameState, move: PlaceFish): void {
+export function placeFish(state: GameState | GameView, move: PlaceFish): void {
   const player = state.players.find(player => player.color === state.activePlayer);
   const availableFish = player!.availableFish[FishSizeEnum.SMALL];
   const currentFishAtPosition = state.fishPositions.find(f => f.position.X === move.position.X && f.position.Y === move.position.Y);

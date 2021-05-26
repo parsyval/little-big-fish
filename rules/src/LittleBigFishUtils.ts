@@ -4,6 +4,7 @@ import { FishSizeEnum } from "./GameElements/Fish";
 import { SurpriseToken, SurpriseTokenEnum } from "./GameElements/SurpriseToken";
 import { SymbolEnum } from './GameElements/Symbols';
 import GameState, { FishAtPosition, Position } from './GameState';
+import GameView from './GameView';
 import { MoveFish, moveFishMove } from './moves/MoveFish';
 import PlayerColor from "./PlayerColor";
 import PlayerState from "./PlayerState";
@@ -100,20 +101,20 @@ export abstract class LBFUtils {
       || symbol === SymbolEnum.PLANKTON_RED || symbol === SymbolEnum.PLANKTON_YELLOW || symbol === SymbolEnum.PLANKTON;
   }
 
-  public static getPossibleMoves(fp: FishAtPosition | null, state: GameState): MoveFish[] {
+  public static getPossibleMoves(state: GameState | GameView, fp?: FishAtPosition): MoveFish[] {
     if (!fp) return [];
 
     const squares = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards))
 
-    const biggerFishes = state.fishPositions.filter(otherFishPos => {
-      if(otherFishPos.fish.color === state.activePlayer) return false;
-
-      return fp.fish.size === FishSizeEnum.SMALL 
+    const biggerFishes = state.fishPositions.filter(otherFishPos =>
+      fp.fish.size === FishSizeEnum.SMALL 
         ? otherFishPos.fish.size === FishSizeEnum.MEDIUM || otherFishPos.fish.size === FishSizeEnum.BIG
         : fp.fish.size === FishSizeEnum.MEDIUM
           ? otherFishPos.fish.size === FishSizeEnum.BIG
-          : false;
-    });
+          : false
+    );
+
+    const sameColorFishes = state.fishPositions.filter(otherFishPos => otherFishPos.fish.color === state.activePlayer);
 
     return [
       {X: fp.position.X, Y: fp.position.Y - 1}, 
@@ -123,6 +124,7 @@ export abstract class LBFUtils {
     ]
     .filter(position => position.X >= 0 && position.X < 6 && position.Y >= 0 && position.Y < 6)
     .filter(position => !(fp.fish.size !== FishSizeEnum.SMALL && squares[position.Y][position.X].type === SymbolEnum.WRECK))
+    .filter(position => !sameColorFishes.find(f => f.position.X === position.X && f.position.Y === position.Y))
     .filter(position => !biggerFishes.find(biggerFish => position.X === biggerFish.position.X && position.Y === biggerFish.position.Y))
     .map(position => moveFishMove(fp.position, position));
   }

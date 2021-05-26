@@ -1,5 +1,6 @@
 import { SymbolEnum } from "../GameElements/Symbols";
 import GameState, { Position } from "../GameState";
+import GameView from "../GameView";
 import { LBFUtils } from "../LittleBigFishUtils";
 import MoveType from "./MoveType";
 
@@ -13,7 +14,7 @@ export function moveFishMove(fromPosition: Position, toPosition: Position): Move
   return {type: MoveType.MOVE_FISH, fromPosition, toPosition};
 }
 
-export function moveFish(state: GameState, move: MoveFish) {
+export function moveFish(state: GameState | GameView, move: MoveFish) {
   const fish = state.fishPositions.find(fp => fp.position.X === move.fromPosition.X && fp.position.Y === move.fromPosition.Y)!.fish;
   
   // Remove old fish position from the list
@@ -38,6 +39,9 @@ export function moveFish(state: GameState, move: MoveFish) {
     // Does not count move when moving from a shipwreck
     state.nbMoves++;
   }
+}
 
-  state.selectedFish = null;
+export function moveFishInView(state: GameView, move: MoveFish) {
+  state.selectedFish = undefined;
+  moveFish(state, move);
 }

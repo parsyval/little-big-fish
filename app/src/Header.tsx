@@ -1,11 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import {css} from '@emotion/react'
-import GameState from '@gamepark/little-big-fish/GameState'
-import {useTranslation} from 'react-i18next'
+import { css } from '@emotion/react'
+import GameView from '@gamepark/little-big-fish/GameView'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   loading: boolean
-  game?: GameState
+  game?: GameView
 }
 
 export default function Header({loading, game}: Props) {

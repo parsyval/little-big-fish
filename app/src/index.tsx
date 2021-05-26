@@ -1,12 +1,12 @@
-import {css, Global} from '@emotion/react'
+import { css, Global } from '@emotion/react'
 import LittleBigFish from '@gamepark/little-big-fish/LittleBigFish'
-import {LittleBigFishOptionsDescription} from '@gamepark/little-big-fish/LittleBigFishOptions'
-import LittleBigFishView from '@gamepark/little-big-fish/LittleBigFishView'
-import {GameProvider, setupTranslation} from '@gamepark/react-client'
+import { LittleBigFishOptionsDescription } from '@gamepark/little-big-fish/LittleBigFishOptions'
+import { GameProvider, setupTranslation } from '@gamepark/react-client'
 import normalize from 'emotion-normalize'
-import {StrictMode} from 'react'
+import { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
+import LittleBigFishView from './LittleBigFishView'
 import translations from './translations.json'
 
 setupTranslation(translations)

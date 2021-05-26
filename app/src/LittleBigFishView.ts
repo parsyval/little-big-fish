@@ -1,13 +1,15 @@
-import { Game } from '@gamepark/rules-api'
-import GameView from './GameView'
-import { moveFish } from './moves/MoveFish'
-import MoveType from './moves/MoveType'
-import MoveView from './moves/MoveView'
-import { placeFish } from './moves/PlaceFish'
-import { selectFish } from './moves/SelectFish'
-import { switchPlayer } from './moves/SwitchPlayer'
-import { upgradeFish } from './moves/UpgradeFish'
-import { startPhase } from './Phase'
+import GameView from "@gamepark/little-big-fish/GameView";
+import { moveFishInView } from "@gamepark/little-big-fish/moves/MoveFish";
+import MoveType from "@gamepark/little-big-fish/moves/MoveType";
+import MoveView from "@gamepark/little-big-fish/moves/MoveView";
+import { placeFish } from "@gamepark/little-big-fish/moves/PlaceFish";
+import { switchPlayer } from "@gamepark/little-big-fish/moves/SwitchPlayer";
+import { upgradeFish } from "@gamepark/little-big-fish/moves/UpgradeFish";
+import { startPhase } from "@gamepark/little-big-fish/Phase";
+import { Game } from '@gamepark/rules-api';
+import { SelectFish, selectFish } from "./moves/SelectFish";
+
+type LocalMove = MoveView | SelectFish;
 
 /**
  * This class is useful when the game has "IncompleteInformation" (or "SecretInformation").
@@ -37,16 +39,16 @@ export default class LittleBigFishView implements Game<GameView, MoveView> {
    *
    * @param move The move that must be applied in the browser of the player or the spectator
    */
-  play(move: MoveView): void {
+  play(move: LocalMove): void {
     switch (move.type) {
       case MoveType.PLACE_FISH:
         return placeFish(this.state, move);
       case MoveType.SWITCH_PLAYER:
         return switchPlayer(this.state);
-      case MoveType.SELECT_FISH:
+      case 'select_fih':
         return selectFish(this.state, move);
       case MoveType.MOVE_FISH:
-        return moveFish(this.state, move);
+        return moveFishInView(this.state, move);
       case MoveType.UPGRADE_FISH:
         return upgradeFish(this.state, move);
       case MoveType.START_PHASE: 

@@ -3,7 +3,6 @@ import { shuffle } from 'lodash';
 import { Board, Board1, Board2, Board3, Board4 } from './GameElements/Board';
 import { FishSizeEnum } from './GameElements/Fish';
 import { SurpriseToken } from './GameElements/SurpriseToken';
-import { SymbolEnum } from './GameElements/Symbols';
 import GameState from './GameState';
 import GameView from './GameView';
 import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions';
@@ -13,7 +12,6 @@ import { moveFish } from './moves/MoveFish';
 import MoveType from './moves/MoveType';
 import MoveView from './moves/MoveView';
 import { placeFish, placeFishMove } from './moves/PlaceFish';
-import { selectFish, selectFishMove } from './moves/SelectFish';
 import { switchPlayer } from './moves/SwitchPlayer';
 import { upgradeFish, upgradeFishMove } from './moves/UpgradeFish';
 import { Phase, startPhase } from './Phase';
@@ -51,13 +49,11 @@ export default class LittleBigFish
       const players: PlayerState[] = arg.players.map(playerOptions => LBFUtils.getInitialPlayerState(playerOptions.id));
       super({
         players,
-        round: 1,
         boards,
         surpriseTokens,
         phase: Phase.START,
         activePlayer: arg.players[0].id,
         fishPositions: [],
-        selectedFish: null,
         nbMoves: 0
       });
     } else {
@@ -104,24 +100,11 @@ export default class LittleBigFish
         );
       }
     } else {
-      if (this.state.selectedFish) {
-        const fishAtPosition = this.state.fishPositions.find(fp => 
-          fp.position.X === this.state.selectedFish!.position.X && fp.position.Y === this.state.selectedFish!.position.Y
-        )!;
-        legalMoves.push(...LBFUtils.getPossibleMoves(fishAtPosition, this.state));
-      } else {
-        const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
-        const fishes = this.state.fishPositions.filter(fp => !fp.fish.hasJustMoved);
-        const fishOnBirth = fishes.find(fp => squaresMatrix[fp.position.Y][fp.position.X].type === SymbolEnum.BIRTH);
-
-        if(fishOnBirth) {
-          // TODO
-        } else {
-          this.state.fishPositions.filter(fp => fp.fish.color === player.color).forEach(fp =>
-            legalMoves.push(selectFishMove(fp))
-          );
+      this.state.fishPositions.forEach(fp => {
+        if(fp.fish.color === this.state.activePlayer) {
+          legalMoves.push(...LBFUtils.getPossibleMoves(this.state, fp));
         }
-      }
+      });
     }
 
     return legalMoves;
@@ -138,8 +121,6 @@ export default class LittleBigFish
         return placeFish(this.state, move);
       case MoveType.SWITCH_PLAYER:
         return switchPlayer(this.state);
-      case MoveType.SELECT_FISH:
-        return selectFish(this.state, move);
       case MoveType.MOVE_FISH:
         return moveFish(this.state, move);
       case MoveType.UPGRADE_FISH:
@@ -182,14 +163,9 @@ export default class LittleBigFish
           const fpThatJustMoved = this.state.fishPositions.find(fp => fp.fish.hasJustMoved);
           if (fpThatJustMoved) {
             const pos = fpThatJustMoved.position;
-            const isFishOnWreck = squaresMatrix[pos.Y][pos.X].type === SymbolEnum.WRECK;
             const isFishOnPlankton = LBFUtils.isPlanktonSymbol(squaresMatrix[pos.Y][pos.X].type);
             
             fpThatJustMoved.fish.hasJustMoved = false;
-
-            if(isFishOnWreck) {
-              return selectFishMove(fpThatJustMoved);
-            } 
 
             if(isFishOnPlankton && fpThatJustMoved.fish.size !== FishSizeEnum.BIG) {
               const square = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))[pos.Y][pos.X];
@@ -212,7 +188,7 @@ export default class LittleBigFish
    * @return What a person can see from the game state
    */
   getView(): GameView {
-    return this.state;
+    return {...this.state, surpriseTokens: this.state.surpriseTokens.length};
   }
 
   /**

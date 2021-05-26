@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css, keyframes } from '@emotion/react'
-import GameState from '@gamepark/little-big-fish/GameState'
+import GameView from '@gamepark/little-big-fish/GameView'
 import { LBFUtils } from '@gamepark/little-big-fish/LittleBigFishUtils'
 import { Letterbox } from '@gamepark/react-components'
 import { Boards } from './Board/Boards'
@@ -9,7 +9,7 @@ import { PlayerSide } from './PlayerSide/PlayerSide'
 import { Square } from './Square/Square'
 
 type Props = {
-  game: GameState
+  game: GameView
 }
 
 export default function GameDisplay({game}: Props) {
@@ -20,11 +20,11 @@ export default function GameDisplay({game}: Props) {
         <Boards boards={game.boards}></Boards>
         
         {LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(game.boards)).map((line, Y) => line.map((square, X) => 
-          <Square squareId={square.id} position={{X, Y}} playerColor={game.activePlayer!} gameState={game} key={`${X}${Y}`}></Square>  
+          <Square squareId={square.id} position={{X, Y}} playerColor={game.activePlayer!} game={game} key={`${X}${Y}`}></Square>  
         ))}
 
         {game.fishPositions.map(fp =>
-          <FishElem gameState={game} fishAtPos={fp} key={`${fp.position.X}${fp.position.Y}`}></FishElem>
+          <FishElem game={game} fishAtPos={fp} key={`${fp.position.X}${fp.position.Y}`}></FishElem>
         )}
       </div>
         <PlayerSide css={css`right: 0`} playerState={game.players[0]}></PlayerSide>

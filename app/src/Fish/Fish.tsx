@@ -1,21 +1,22 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 import { FishSizeEnum } from "@gamepark/little-big-fish/GameElements/Fish";
-import GameState, { FishAtPosition } from "@gamepark/little-big-fish/GameState";
-import { selectFishMove } from "@gamepark/little-big-fish/moves/SelectFish";
+import { FishAtPosition } from "@gamepark/little-big-fish/GameState";
+import GameView from "@gamepark/little-big-fish/GameView";
 import { Phase } from "@gamepark/little-big-fish/Phase";
 import PlayerColor from "@gamepark/little-big-fish/PlayerColor";
 import { usePlay } from "@gamepark/react-client";
 import { FunctionComponent } from "react";
 import { Images } from "../images/Images";
+import { selectFishMove } from "../moves/SelectFish";
 import { squarePosCss } from "../Square/Square";
 
 type FishProps = React.HTMLAttributes<HTMLImageElement> & {
   fishAtPos: FishAtPosition;
-  gameState: GameState;
+  game: GameView;
 }
 
-export const FishElem: FunctionComponent<FishProps> = ({fishAtPos, gameState}) => {
+export const FishElem: FunctionComponent<FishProps> = ({fishAtPos, game}) => {
   const play = usePlay();
 
   const getFishImage = function(color: PlayerColor, size: FishSizeEnum) {
@@ -29,16 +30,15 @@ export const FishElem: FunctionComponent<FishProps> = ({fishAtPos, gameState}) =
   }
 
   const isClickable = () => {
-    return gameState.phase === Phase.PLAY && gameState.selectedFish === null
-      && fishAtPos.fish.color === gameState.activePlayer;
+    return game.phase === Phase.PLAY && !game.selectedFish
+      && fishAtPos.fish.color === game.activePlayer;
   }
 
   const onClick = () => {
     if(isClickable()) {
-      play(selectFishMove(fishAtPos));
+      play(selectFishMove(fishAtPos), {local: true});
     }
   }
-
 
   return (
     <span css={squarePosCss(fishAtPos.position)}>

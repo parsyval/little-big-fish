@@ -10,11 +10,9 @@ type GameState = {
   boards: Board[];
   phase: Phase;
   activePlayer?: PlayerColor;
-  round: number;
   surpriseTokens: SurpriseToken[];
   fishPositions: FishAtPosition[];
   nbMoves: number;
-  selectedFish: FishAtPosition | null;
 }
 
 export type Position = {X: number; Y: number;}

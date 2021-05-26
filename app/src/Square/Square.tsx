@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
-import GameState, { Position } from "@gamepark/little-big-fish/GameState";
+import { Position } from "@gamepark/little-big-fish/GameState";
+import GameView from "@gamepark/little-big-fish/GameView";
 import { LBFUtils } from '@gamepark/little-big-fish/LittleBigFishUtils';
 import { moveFishMove } from "@gamepark/little-big-fish/moves/MoveFish";
 import { placeFishMove } from "@gamepark/little-big-fish/moves/PlaceFish";
@@ -11,7 +12,7 @@ import { FunctionComponent } from "react";
 
 type SquareProps = {
   squareId: number;
-  gameState: GameState;
+  game: GameView;
   position: Position;
   playerColor: PlayerColor;
 }
@@ -19,24 +20,24 @@ type SquareProps = {
 export const SQUARE_W = 8.2;
 export const SQUARE_H = 16.5;
 
-export const Square: FunctionComponent<SquareProps> = ({squareId, position, gameState, playerColor}) => {
+export const Square: FunctionComponent<SquareProps> = ({squareId, position, game, playerColor}) => {
   const play = usePlay()
 
   const isPlaceStartFish = (): boolean => 
-    gameState.activePlayer! === playerColor && gameState.phase === Phase.START 
-    && LBFUtils.getStartPositionsWithoutFish(playerColor, gameState.fishPositions)
+    game.activePlayer! === playerColor && game.phase === Phase.START 
+      && LBFUtils.getStartPositionsWithoutFish(playerColor, game.fishPositions)
       .some(pos => pos.X === position.X && pos.Y === position.Y);
 
   const isPossibleMove = (): boolean =>
-    gameState.activePlayer! === playerColor && gameState.phase === Phase.PLAY
-      && LBFUtils.getPossibleMoves(gameState.selectedFish, gameState)
+    game.activePlayer! === playerColor && game.phase === Phase.PLAY
+      && LBFUtils.getPossibleMoves(game, game.selectedFish)
       .some(move => move.toPosition.X === position.X && move.toPosition.Y === position.Y);
 
   const onClick = (): void => {
     if(isPlaceStartFish()) {
       play(placeFishMove(position));
     } else if(isPossibleMove()) {
-      play(moveFishMove({X: gameState.selectedFish!.position.X, Y: gameState.selectedFish!.position.Y}, position));
+      play(moveFishMove({X: game.selectedFish!.position.X, Y: game.selectedFish!.position.Y}, position));
     }
   }
 
@@ -49,7 +50,7 @@ export const Square: FunctionComponent<SquareProps> = ({squareId, position, game
   `
 
   return (
-    <span css={[squarePosCss(position), zindex(!!gameState.selectedFish), isClickableCss()]} onClick={ onClick } >
+    <span css={[squarePosCss(position), zindex(!!game.selectedFish), isClickableCss()]} onClick={ onClick } >
       <span css={css`font-size: large; color: black; font-weight: bold`}>{squareId}</span>
     </span> 
   );

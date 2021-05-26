@@ -1,4 +1,4 @@
-import GameState from './GameState';
+import GameState, { FishAtPosition } from './GameState';
 
 /**
  * In here, you describe what a GameView will look like at any time during a game.
@@ -9,6 +9,6 @@ import GameState from './GameState';
 //   deck: number
 // }
 
-type GameView = GameState;
+type GameView = Omit<GameState, 'surpriseTokens'> & {selectedFish?: FishAtPosition, surpriseTokens: number};
 
 export default GameView
