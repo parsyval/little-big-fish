@@ -5,7 +5,6 @@ import { SurpriseToken, SurpriseTokenEnum } from "./GameElements/SurpriseToken";
 import { SymbolEnum } from './GameElements/Symbols';
 import GameState, { FishAtPosition, Position } from './GameState';
 import GameView from './GameView';
-import { MoveFish, moveFishMove } from './moves/MoveFish';
 import PlayerColor from "./PlayerColor";
 import PlayerState from "./PlayerState";
 
@@ -101,10 +100,10 @@ export abstract class LBFUtils {
       || symbol === SymbolEnum.PLANKTON_RED || symbol === SymbolEnum.PLANKTON_YELLOW || symbol === SymbolEnum.PLANKTON;
   }
 
-  public static getPossibleMoves(state: GameState | GameView, fp?: FishAtPosition): MoveFish[] {
+  public static getPossibleMovePositions(state: GameState | GameView, fp?: FishAtPosition): Position[] {
     if (!fp) return [];
 
-    const squares = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards))
+    const squares: Square[][] = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards))
 
     const biggerFishes = state.fishPositions.filter(otherFishPos =>
       fp.fish.size === FishSizeEnum.SMALL 
@@ -116,16 +115,29 @@ export abstract class LBFUtils {
 
     const sameColorFishes = state.fishPositions.filter(otherFishPos => otherFishPos.fish.color === state.activePlayer);
 
-    return [
-      {X: fp.position.X, Y: fp.position.Y - 1}, 
-      {X: fp.position.X, Y: fp.position.Y + 1}, 
-      {X: fp.position.X - 1, Y: fp.position.Y}, 
-      {X: fp.position.X + 1, Y: fp.position.Y},
+    return LBFUtils.getAdjacentSquares(squares, fp.position, fp.fish.size)
+      .filter(position => !(fp.fish.size !== FishSizeEnum.SMALL && squares[position.Y][position.X].type === SymbolEnum.WRECK))
+      .filter(position => !sameColorFishes.find(f => f.position.X === position.X && f.position.Y === position.Y))
+      .filter(position => !biggerFishes.find(biggerFish => position.X === biggerFish.position.X && position.Y === biggerFish.position.Y));
+  }
+
+  public static getAdjacentSquares(squares: Square[][], position: Position, fishSize: FishSizeEnum, alreadyTestedPos: Position[] = []): Position[] {
+    let directAdjacent: Position[] = [
+      {X: position.X, Y: position.Y - 1}, 
+      {X: position.X, Y: position.Y + 1}, 
+      {X: position.X - 1, Y: position.Y}, 
+      {X: position.X + 1, Y: position.Y},
     ]
     .filter(position => position.X >= 0 && position.X < 6 && position.Y >= 0 && position.Y < 6)
-    .filter(position => !(fp.fish.size !== FishSizeEnum.SMALL && squares[position.Y][position.X].type === SymbolEnum.WRECK))
-    .filter(position => !sameColorFishes.find(f => f.position.X === position.X && f.position.Y === position.Y))
-    .filter(position => !biggerFishes.find(biggerFish => position.X === biggerFish.position.X && position.Y === biggerFish.position.Y))
-    .map(position => moveFishMove(fp.position, position));
+    .filter(pos => !alreadyTestedPos.some(test => test.X === pos.X && test.Y === pos.Y));
+
+    if(fishSize === FishSizeEnum.SMALL) {
+      const wrecks = directAdjacent.filter(pos => squares[pos.Y][pos.X].type === SymbolEnum.WRECK);
+      alreadyTestedPos = [...alreadyTestedPos, ...wrecks];
+      let wreckAdjacentsquares = wrecks.map(wreckPos => this.getAdjacentSquares(squares, wreckPos, fishSize, alreadyTestedPos));
+      wreckAdjacentsquares.forEach(adjacentSquares => directAdjacent.push(...adjacentSquares));
+    }
+    
+    return directAdjacent.filter(pos => !(squares[pos.Y][pos.X].type === SymbolEnum.WRECK));
   }
 }

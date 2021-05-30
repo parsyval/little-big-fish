@@ -8,7 +8,7 @@ import GameView from './GameView';
 import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions';
 import { LBFUtils } from './LittleBigFishUtils';
 import Move from './moves/Move';
-import { moveFish } from './moves/MoveFish';
+import { moveFish, moveFishMove } from './moves/MoveFish';
 import MoveType from './moves/MoveType';
 import MoveView from './moves/MoveView';
 import { placeFish, placeFishMove } from './moves/PlaceFish';
@@ -102,7 +102,7 @@ export default class LittleBigFish
     } else {
       this.state.fishPositions.forEach(fp => {
         if(fp.fish.color === this.state.activePlayer) {
-          legalMoves.push(...LBFUtils.getPossibleMoves(this.state, fp));
+          legalMoves.push(...LBFUtils.getPossibleMovePositions(this.state, fp).map(position => moveFishMove(fp.position, position)));
         }
       });
     }

@@ -30,8 +30,8 @@ export const Square: FunctionComponent<SquareProps> = ({squareId, position, game
 
   const isPossibleMove = (): boolean =>
     game.activePlayer! === playerColor && game.phase === Phase.PLAY
-      && LBFUtils.getPossibleMoves(game, game.selectedFish)
-      .some(move => move.toPosition.X === position.X && move.toPosition.Y === position.Y);
+      && LBFUtils.getPossibleMovePositions(game, game.selectedFish)
+      .some(pos => pos.X === position.X && pos.Y === position.Y);
 
   const onClick = (): void => {
     if(isPlaceStartFish()) {
