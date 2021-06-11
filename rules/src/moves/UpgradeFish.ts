@@ -18,7 +18,9 @@ export function upgradeFish(state: GameState | GameView, move: UpgradeFish) {
   state.fishPositions = state.fishPositions.filter(fp => !(fp.position.X === move.position.X && fp.position.Y === move.position.Y));
   state.fishPositions.push({position: move.position, fish: {
     color: fish.color,
-    size: fish.size === FishSizeEnum.SMALL ? FishSizeEnum.MEDIUM : FishSizeEnum.BIG,
-    hasJustMoved: false,
+    size: fish.size === FishSizeEnum.SMALL ? FishSizeEnum.MEDIUM : FishSizeEnum.BIG
   }});
+
+  state.fishNeedsAction = undefined;
+  state.nbMoves++;
 }

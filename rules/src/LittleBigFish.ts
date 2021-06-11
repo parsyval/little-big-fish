@@ -1,12 +1,14 @@
 import { IncompleteInformation, SequentialGame } from '@gamepark/rules-api';
 import { shuffle } from 'lodash';
-import { Board, Board1, Board2, Board3, Board4 } from './GameElements/Board';
+import { Board, Board1, Board2, Board3, Board4, Square } from './GameElements/Board';
 import { FishSizeEnum } from './GameElements/Fish';
 import { SurpriseToken } from './GameElements/SurpriseToken';
+import { SymbolEnum } from './GameElements/Symbols';
 import GameState from './GameState';
 import GameView from './GameView';
 import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions';
 import { LBFUtils } from './LittleBigFishUtils';
+import { didNotNeedAction, didNotNeedActionMove } from './moves/FishDidNotNeedAction';
 import Move from './moves/Move';
 import { moveFish, moveFishMove } from './moves/MoveFish';
 import MoveType from './moves/MoveType';
@@ -54,7 +56,7 @@ export default class LittleBigFish
         phase: Phase.START,
         activePlayer: arg.players[0].id,
         fishPositions: [],
-        nbMoves: 0
+        nbMoves: 0,
       });
     } else {
       super(arg);
@@ -100,12 +102,25 @@ export default class LittleBigFish
         );
       }
     } else {
-      this.state.fishPositions.forEach(fp => {
-        if(fp.fish.color === this.state.activePlayer) {
-          legalMoves.push(...LBFUtils.getPossibleMovePositions(this.state, fp).map(position => moveFishMove(fp.position, position)));
+      if(this.state.fishNeedsAction) {
+        const squares: Square[][] = LBFUtils.getSquareMatrix(this.state);
+        const isFishOnBirth = squares[this.state.fishNeedsAction.position.Y][this.state.fishNeedsAction.position.X].type === SymbolEnum.BIRTH;
+        
+        if(isFishOnBirth) {
+          legalMoves.push(...LBFUtils.getFreeOceanPositions(this.state, this.state.fishNeedsAction.position).map(pos => placeFishMove(pos)));
         }
-      });
+      } else {
+        this.state.fishPositions.forEach(fp => {
+          if(fp.fish.color === this.state.activePlayer) {
+            legalMoves.push(...LBFUtils.getPossibleMovePositions(this.state, fp).map(position => moveFishMove(fp.position, position)));
+          }
+        });
+      }
     }
+
+    console.log('%cLegal moves =>', 'color:blue');
+    console.log('moves', legalMoves);  
+    console.log('%c---------------------------', 'color:blue');
 
     return legalMoves;
   }
@@ -127,6 +142,8 @@ export default class LittleBigFish
         return upgradeFish(this.state, move);
       case MoveType.START_PHASE:
         return startPhase(this.state, move);
+      case MoveType.DIDNOTNEEDACTION: 
+        return didNotNeedAction(this.state);
     }
   }
 
@@ -143,7 +160,7 @@ export default class LittleBigFish
    *
    * @return The next automatic consequence that should be played in current game state.
    */
-  getAutomaticMove(): void | Move {
+  getAutomaticMove(): void | Move {    
     const activePlayerColor = this.getActivePlayer();
     if (activePlayerColor) {
       if (this.state.phase === Phase.START) {
@@ -155,26 +172,34 @@ export default class LittleBigFish
           return { type: MoveType.SWITCH_PLAYER };
         }
       } else {
-        if(this.state.nbMoves === 2) {
+        console.log('%cAuto begin', 'color:red');
+        console.log('NbMoves = ', this.state.nbMoves);
+        console.log('Fish needs action = ', this.state.fishNeedsAction);
+        console.log('%c-----------------------------', 'color:red');
+        if(this.state.nbMoves >= 2) {
+          console.log('%cAuto switch player', 'color:red');
           this.state.nbMoves = 0;
           return { type: MoveType.SWITCH_PLAYER };
         } else {
-          const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards));
-          const fpThatJustMoved = this.state.fishPositions.find(fp => fp.fish.hasJustMoved);
-          if (fpThatJustMoved) {
-            const pos = fpThatJustMoved.position;
+          const squaresMatrix = LBFUtils.getSquareMatrix(this.state);
+          if (this.state.fishNeedsAction) {
+            const pos = this.state.fishNeedsAction.position;
             const isFishOnPlankton = LBFUtils.isPlanktonSymbol(squaresMatrix[pos.Y][pos.X].type);
-            
-            fpThatJustMoved.fish.hasJustMoved = false;
 
-            if(isFishOnPlankton && fpThatJustMoved.fish.size !== FishSizeEnum.BIG) {
-              const square = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(this.state.boards))[pos.Y][pos.X];
+            if(isFishOnPlankton && this.state.fishNeedsAction.fish.size !== FishSizeEnum.BIG) {
+              console.log('%cFish on plankton isn\'t big', 'color:red')
+              const square = LBFUtils.getSquareMatrix(this.state)[pos.Y][pos.X];
               const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
               const planktonToken = player.planktonTokens.find(pt => pt.color === square.type);
               
               if (planktonToken && planktonToken.isAvailable) {
+                console.log('%cAuto upgrade fish', 'color:red')
                 planktonToken.isAvailable = false;
                 return upgradeFishMove(pos);
+                
+              } else {
+                console.log('%cNo upgrade', 'color:red');
+                return didNotNeedActionMove();
               }
             }
           }

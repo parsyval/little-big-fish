@@ -19,7 +19,7 @@ export function placeFish(state: GameState | GameView, move: PlaceFish): void {
   const player = state.players.find(player => player.color === state.activePlayer);
   const availableFish = player!.availableFish[FishSizeEnum.SMALL];
   const currentFishAtPosition = state.fishPositions.find(f => f.position.X === move.position.X && f.position.Y === move.position.Y);
-  const newFish = {size: FishSizeEnum.SMALL, color: state.activePlayer!, hasJustMoved: false}
+  const newFish = {size: FishSizeEnum.SMALL, color: state.activePlayer!}
   
   if(currentFishAtPosition) {
     currentFishAtPosition.fish = newFish;
@@ -28,4 +28,7 @@ export function placeFish(state: GameState | GameView, move: PlaceFish): void {
   }
 
   player!.availableFish[FishSizeEnum.SMALL] = availableFish - 1;
+
+  state.fishNeedsAction = undefined;
+  state.nbMoves++;
 }

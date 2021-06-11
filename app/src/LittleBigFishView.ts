@@ -1,4 +1,5 @@
 import GameView from "@gamepark/little-big-fish/GameView";
+import { didNotNeedAction } from "@gamepark/little-big-fish/moves/FishDidNotNeedAction";
 import { moveFishInView } from "@gamepark/little-big-fish/moves/MoveFish";
 import MoveType from "@gamepark/little-big-fish/moves/MoveType";
 import MoveView from "@gamepark/little-big-fish/moves/MoveView";
@@ -53,6 +54,8 @@ export default class LittleBigFishView implements Game<GameView, MoveView> {
         return upgradeFish(this.state, move);
       case MoveType.START_PHASE: 
         return startPhase(this.state, move);
+      case MoveType.DIDNOTNEEDACTION:
+        return didNotNeedAction(this.state);
     }
   }
 }

@@ -31,6 +31,7 @@ export const FishElem: FunctionComponent<FishProps> = ({fishAtPos, game}) => {
 
   const isClickable = () => {
     return game.phase === Phase.PLAY && !game.selectedFish
+      && !game.fishNeedsAction
       && fishAtPos.fish.color === game.activePlayer;
   }
 

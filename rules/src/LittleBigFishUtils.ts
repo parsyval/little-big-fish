@@ -77,7 +77,9 @@ export abstract class LBFUtils {
     return boards.map(LBFUtils.getBoardViewFromBoard);
   }
 
-  public static getSquareMatrix(views: BoardView[]): Square[][] {
+  public static getSquareMatrix(state: GameState | GameView): Square[][] {
+    const views = LBFUtils.getBoardViews(state.boards);
+    
     return [
       [...views[0].squares[0], ...views[1].squares[0]],
       [...views[0].squares[1], ...views[1].squares[1]],
@@ -103,7 +105,7 @@ export abstract class LBFUtils {
   public static getPossibleMovePositions(state: GameState | GameView, fp?: FishAtPosition): Position[] {
     if (!fp) return [];
 
-    const squares: Square[][] = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards))
+    const squares: Square[][] = LBFUtils.getSquareMatrix(state)
 
     const biggerFishes = state.fishPositions.filter(otherFishPos =>
       fp.fish.size === FishSizeEnum.SMALL 
@@ -139,5 +141,24 @@ export abstract class LBFUtils {
     }
     
     return directAdjacent.filter(pos => !(squares[pos.Y][pos.X].type === SymbolEnum.WRECK));
+  }
+
+  public static getFreeOceanPositions(state: GameState | GameView, position: Position): Position[] {
+    const xMin = position.X < 3 ? 0 : 3;
+    const yMin = position.Y < 3 ? 0 : 3;
+
+    const positions: Position[] = [];
+
+    for (let i=0 ; i<3 ; i++) {
+      for (let j=0 ; j<3 ; j++) {
+        positions.push({X: i+xMin, Y: j+yMin});
+      }
+    }
+
+    const squares: Square[][] = LBFUtils.getSquareMatrix(state);
+
+    return positions
+      .filter(pos => squares[pos.Y][pos.X].type === SymbolEnum.OCEAN)
+      .filter(pos => !(state.fishPositions.some(fp => fp.position.X === pos.X && fp.position.Y === pos.Y)));
   }
 }

@@ -1,5 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { Square } from "@gamepark/little-big-fish/GameElements/Board";
+import { SymbolEnum } from "@gamepark/little-big-fish/GameElements/Symbols";
 import { Position } from "@gamepark/little-big-fish/GameState";
 import GameView from "@gamepark/little-big-fish/GameView";
 import { LBFUtils } from '@gamepark/little-big-fish/LittleBigFishUtils';
@@ -20,7 +22,7 @@ type SquareProps = {
 export const SQUARE_W = 8.2;
 export const SQUARE_H = 16.5;
 
-export const Square: FunctionComponent<SquareProps> = ({squareId, position, game, playerColor}) => {
+export const SquareComponent: FunctionComponent<SquareProps> = ({squareId, position, game, playerColor}) => {
   const play = usePlay()
 
   const isPlaceStartFish = (): boolean => 
@@ -30,11 +32,20 @@ export const Square: FunctionComponent<SquareProps> = ({squareId, position, game
 
   const isPossibleMove = (): boolean =>
     game.activePlayer! === playerColor && game.phase === Phase.PLAY
+      && !game.fishNeedsAction
+      && !!game.selectedFish
       && LBFUtils.getPossibleMovePositions(game, game.selectedFish)
       .some(pos => pos.X === position.X && pos.Y === position.Y);
+  
+  const isOceanWhileActiveFishOnBirth = (): boolean => {
+    const squares: Square[][] = LBFUtils.getSquareMatrix(game);
+    if(!game.fishNeedsAction || squares[game.fishNeedsAction.position.Y][game.fishNeedsAction.position.X].type !== SymbolEnum.BIRTH) return false;
+    
+    return LBFUtils.getFreeOceanPositions(game, game.fishNeedsAction.position).some(ocean => ocean.X === position.X && ocean.Y === position.Y);
+  }
 
   const onClick = (): void => {
-    if(isPlaceStartFish()) {
+    if(isPlaceStartFish() || isOceanWhileActiveFishOnBirth()) {
       play(placeFishMove(position));
     } else if(isPossibleMove()) {
       play(moveFishMove({X: game.selectedFish!.position.X, Y: game.selectedFish!.position.Y}, position));
@@ -42,7 +53,7 @@ export const Square: FunctionComponent<SquareProps> = ({squareId, position, game
   }
 
   const isClickable = (): boolean => {
-    return isPlaceStartFish() || isPossibleMove();
+    return isPlaceStartFish() || isPossibleMove() || isOceanWhileActiveFishOnBirth();
   }
 
   const isClickableCss = () => css`

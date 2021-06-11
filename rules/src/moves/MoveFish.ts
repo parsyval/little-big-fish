@@ -1,5 +1,5 @@
 import { SymbolEnum } from "../GameElements/Symbols";
-import GameState, { Position } from "../GameState";
+import GameState, { FishAtPosition, Position } from "../GameState";
 import GameView from "../GameView";
 import { LBFUtils } from "../LittleBigFishUtils";
 import MoveType from "./MoveType";
@@ -15,6 +15,9 @@ export function moveFishMove(fromPosition: Position, toPosition: Position): Move
 }
 
 export function moveFish(state: GameState | GameView, move: MoveFish) {
+  console.log('%cMOVE FISH', 'color:green');
+  console.log('----> ', JSON.stringify(move));
+  
   const fish = state.fishPositions.find(fp => fp.position.X === move.fromPosition.X && fp.position.Y === move.fromPosition.Y)!.fish;
   
   // Remove old fish position from the list
@@ -28,20 +31,24 @@ export function moveFish(state: GameState | GameView, move: MoveFish) {
     state.players.find(p => p.color === state.activePlayer)!.capturedFishes++;
   }
 
-  fish.hasJustMoved = true;
+  const fishAtPos: FishAtPosition = {fish, position: move.toPosition};
 
-  state.fishPositions.push({fish, position: move.toPosition});
+  state.fishPositions.push(fishAtPos);
   
-  const squaresMatrix = LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(state.boards));
-  const isFishOnWreck = squaresMatrix[move.toPosition.Y][move.toPosition.X].type === SymbolEnum.WRECK;
-  
-  if(!isFishOnWreck) {
-    // Does not count move when moving from a shipwreck
+  const squaresMatrix = LBFUtils.getSquareMatrix(state);
+  const isFishOnBirth = squaresMatrix[move.toPosition.Y][move.toPosition.X].type === SymbolEnum.BIRTH;
+  const isFishOnPlankton = LBFUtils.isPlanktonSymbol(squaresMatrix[move.toPosition.Y][move.toPosition.X].type);
+
+  if(isFishOnBirth || isFishOnPlankton) {
+    state.fishNeedsAction = fishAtPos;
+  } else {
     state.nbMoves++;
   }
 }
 
 export function moveFishInView(state: GameView, move: MoveFish) {
+  console.log('%cMove fish in view', 'color:green');
+  
   state.selectedFish = undefined;
   moveFish(state, move);
 }

@@ -6,7 +6,7 @@ import { Letterbox } from '@gamepark/react-components'
 import { Boards } from './Board/Boards'
 import { FishElem } from './Fish/Fish'
 import { PlayerSide } from './PlayerSide/PlayerSide'
-import { Square } from './Square/Square'
+import { SquareComponent } from './Square/Square'
 
 type Props = {
   game: GameView
@@ -19,8 +19,8 @@ export default function GameDisplay({game}: Props) {
       <div css={css`position: absolute; left: 20%; width: 110%`}>
         <Boards boards={game.boards}></Boards>
         
-        {LBFUtils.getSquareMatrix(LBFUtils.getBoardViews(game.boards)).map((line, Y) => line.map((square, X) => 
-          <Square squareId={square.id} position={{X, Y}} playerColor={game.activePlayer!} game={game} key={`${X}${Y}`}></Square>  
+        {LBFUtils.getSquareMatrix(game).map((line, Y) => line.map((square, X) => 
+          <SquareComponent squareId={square.id} position={{X, Y}} playerColor={game.activePlayer!} game={game} key={`${X}${Y}`}></SquareComponent>  
         ))}
 
         {game.fishPositions.map(fp =>
