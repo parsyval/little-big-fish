@@ -46,7 +46,7 @@ export default class LittleBigFishView implements Game<GameView, MoveView> {
         return placeFish(this.state, move);
       case MoveType.SWITCH_PLAYER:
         return switchPlayer(this.state);
-      case 'select_fih':
+      case 'select_fish':
         return selectFish(this.state, move);
       case MoveType.MOVE_FISH:
         return moveFishInView(this.state, move);
