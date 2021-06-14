@@ -8,7 +8,6 @@ import GameState from './GameState';
 import GameView from './GameView';
 import { isGameOptions, LittleBigFishOptions } from './LittleBigFishOptions';
 import { LBFUtils } from './LittleBigFishUtils';
-import { didNotNeedAction, didNotNeedActionMove } from './moves/FishDidNotNeedAction';
 import Move from './moves/Move';
 import { moveFish, moveFishMove } from './moves/MoveFish';
 import MoveType from './moves/MoveType';
@@ -142,8 +141,6 @@ export default class LittleBigFish
         return upgradeFish(this.state, move);
       case MoveType.START_PHASE:
         return startPhase(this.state, move);
-      case MoveType.DIDNOTNEEDACTION: 
-        return didNotNeedAction(this.state);
     }
   }
 
@@ -186,21 +183,8 @@ export default class LittleBigFish
             const pos = this.state.fishNeedsAction.position;
             const isFishOnPlankton = LBFUtils.isPlanktonSymbol(squaresMatrix[pos.Y][pos.X].type);
 
-            if(isFishOnPlankton && this.state.fishNeedsAction.fish.size !== FishSizeEnum.BIG) {
-              console.log('%cFish on plankton isn\'t big', 'color:red')
-              const square = LBFUtils.getSquareMatrix(this.state)[pos.Y][pos.X];
-              const player = this.state.players.find(p => p.color === this.state.activePlayer)!;
-              const planktonToken = player.planktonTokens.find(pt => pt.color === square.type);
-              
-              if (planktonToken && planktonToken.isAvailable) {
-                console.log('%cAuto upgrade fish', 'color:red')
-                planktonToken.isAvailable = false;
-                return upgradeFishMove(pos);
-                
-              } else {
-                console.log('%cNo upgrade', 'color:red');
-                return didNotNeedActionMove();
-              }
+            if(isFishOnPlankton) {
+              return upgradeFishMove(pos);
             }
           }
         }
