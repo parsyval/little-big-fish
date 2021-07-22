@@ -106,7 +106,16 @@ export default class LittleBigFish
         const isFishOnBirth = squares[this.state.fishNeedsAction.position.Y][this.state.fishNeedsAction.position.X].type === SymbolEnum.BIRTH;
         
         if(isFishOnBirth) {
-          legalMoves.push(...LBFUtils.getFreeOceanPositions(this.state, this.state.fishNeedsAction.position).map(pos => placeFishMove(pos)));
+          const freeOceans = LBFUtils.getFreeOceanPositions(this.state, this.state.fishNeedsAction.position);
+          if(freeOceans.length > 0) {
+            legalMoves.push(...freeOceans.map(pos => placeFishMove(pos)));
+          } else {
+            this.state.fishPositions.forEach(fp => {
+              if(fp.fish.color === this.state.activePlayer) {
+                legalMoves.push(...LBFUtils.getPossibleMovePositions(this.state, fp).map(position => moveFishMove(fp.position, position)));
+              }
+            });
+          }
         }
       } else {
         this.state.fishPositions.forEach(fp => {

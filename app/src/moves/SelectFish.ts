@@ -11,5 +11,6 @@ export function selectFishMove(fishAtPos: FishAtPosition): SelectFish {
 }
 
 export function selectFish(state: GameView, move: SelectFish): void {
+  state.fishNeedsAction = undefined;
   state.selectedFish = move.fishAtPos;
 }

@@ -1,8 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
+import { Square } from "@gamepark/little-big-fish/GameElements/Board";
 import { FishSizeEnum } from "@gamepark/little-big-fish/GameElements/Fish";
+import { SymbolEnum } from "@gamepark/little-big-fish/GameElements/Symbols";
 import { FishAtPosition } from "@gamepark/little-big-fish/GameState";
 import GameView from "@gamepark/little-big-fish/GameView";
+import { LBFUtils } from "@gamepark/little-big-fish/LittleBigFishUtils";
 import { Phase } from "@gamepark/little-big-fish/Phase";
 import PlayerColor from "@gamepark/little-big-fish/PlayerColor";
 import { usePlay } from "@gamepark/react-client";
@@ -30,8 +33,21 @@ export const FishElem: FunctionComponent<FishProps> = ({fishAtPos, game}) => {
   }
 
   const isClickable = () => {
+    let isOnBirthAndHasFreeOcean = false;
+    if(game.fishNeedsAction) {
+    const squares: Square[][] = LBFUtils.getSquareMatrix(game);
+    const isFishOnBirth = squares[game.fishNeedsAction.position.Y][game.fishNeedsAction.position.X].type === SymbolEnum.BIRTH;
+
+    if(isFishOnBirth) {
+      const freeOceans = LBFUtils.getFreeOceanPositions(game, game.fishNeedsAction.position);
+      if(freeOceans.length > 0) {
+        isOnBirthAndHasFreeOcean = true;
+      }
+    }
+  }
+
     return game.phase === Phase.PLAY && !game.selectedFish
-      && !game.fishNeedsAction
+      && !isOnBirthAndHasFreeOcean
       && fishAtPos.fish.color === game.activePlayer;
   }
 
